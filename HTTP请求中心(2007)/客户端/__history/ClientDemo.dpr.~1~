@@ -1,0 +1,20 @@
+program ClientDemo;
+
+uses
+  Forms,
+  Unit1 in 'Unit1.pas' {Form21},
+  Unit2 in 'Unit2.pas' {Form2},
+  uVar in 'uVar.pas',
+  uFrmDish in 'uFrmDish.pas' {Form3},
+  Unit4 in 'Unit4.pas' {Form4},
+  Unit5 in 'Unit5.pas' {Form5};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TForm21, Form21);
+  Application.CreateForm(TForm5, Form5);
+  Application.Run;
+end.

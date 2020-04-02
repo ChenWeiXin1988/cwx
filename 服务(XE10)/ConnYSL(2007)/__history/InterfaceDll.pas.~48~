@@ -1,0 +1,66 @@
+unit InterfaceDll;
+
+
+interface
+
+uses
+  unt_objects, Windows, SysUtils;
+var
+  GCOMPos:TCOMPos;
+
+
+function YSL_OpenPort(ComPort: Byte): Boolean; stdcall;             //打开端口
+function YSL_ClosePort: Boolean; stdcall;                           //关闭端口
+//0x01 读卡
+function YSL_ReadCard(var cCard: string; var Balance: Currency): Byte; stdcall;
+//0x02 消费
+function YSL_Consume(cCard: string; cPay: Currency; iFlow: Byte; var Balance, cPayEx: Currency): Byte; stdcall;
+//0x02 消费
+function YSL_ConsumeEx(cCard: string; cPay: Currency; iFlow: Byte; var Balance, cPayEx: Currency): Byte; stdcall;
+//0x03 交易确认
+function YSL_Query(cCard: string; cPay: Currency; iFlow: Byte; var Balance, cPayEx: Currency): Byte; stdcall;
+
+implementation
+
+uses
+  UBuffer;
+  
+//打开端口
+function YSL_OpenPort(ComPort:Byte):Boolean;
+begin
+  if GCOMPos=nil then
+    GCOMPos := TCOMPos.Create;              
+  Result := GCOMPos.OpenPort(ComPort);
+end;
+
+//关闭端口
+function YSL_ClosePort:Boolean;
+begin
+  Result:= False;
+  if GCOMPos<>nil then
+  begin
+    GCOMPos.Free;
+    GCOMPos := nil;
+  end;
+  Result:= True;
+end;
+
+//0x01 读卡
+function YSL_ReadCard(var cCard: string; var Balance: Currency): Byte; stdcall;
+begin
+  Result:= GCOMPos.ReadCard(cCard, Balance);
+end;
+
+//0x02 消费
+function YSL_Consume(cCard: string; cPay: Currency; iFlow: Byte; var Balance, cPayEx: Currency): Byte; stdcall;
+begin
+  Result:= GCOMPos.Consume(cCard, cPay, iFlow, Balance, cPayEx);
+end;
+
+//0x03 交易确认
+function YSL_Query(cCard: string; cPay: Currency; iFlow: Byte; var Balance, cPayEx: Currency): Byte; stdcall;
+begin
+  Result:= GCOMPos.Query(cCard, cPay, iFlow, Balance, cPayEx);
+end;
+
+end.

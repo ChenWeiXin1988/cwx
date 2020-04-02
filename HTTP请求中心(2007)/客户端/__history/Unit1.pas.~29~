@@ -1,0 +1,70 @@
+unit Unit1;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,Unit4,
+  Dialogs, StdCtrls, Mask, RzEdit, RzLabel, ExtCtrls,Unit2,Unit5,
+  ActnList,uVar,uFrmDish;
+
+type
+  TForm21 = class(TForm)
+    btnHeart: TButton;
+    btnServerTime: TButton;
+    Memo1: TMemo;
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure btnHeartClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form21: TForm21;
+
+implementation
+
+uses superobject;
+
+{$R *.dfm}
+
+procedure TForm21.btnHeartClick(Sender: TObject);
+var
+  Tjson, Vjson: ISuperObject;
+  sOut: string;
+  aparam: TRunPara;
+  cAmout: string;
+  iCount: string;
+  bLine :Boolean;
+begin
+  bLine := false;
+  Vjson := SO();
+  try
+    Vjson.S['poscode'] := '35';
+    if not GAppRunClass.Info_POSt(sOut, 'cwx.heart', Vjson.AsString) then
+      Exit;
+    try
+      SystemLog(sOut);
+    except
+
+    end;
+  finally
+    Vjson := nil;
+  end;
+end;
+
+procedure TForm21.FormCreate(Sender: TObject);
+begin
+  GAppRunClass := TAppRunClass.Create;
+  GAppRunClass.ReadPara;
+end;
+
+procedure TForm21.FormDestroy(Sender: TObject);
+begin
+  if Assigned(GAppRunClass) then
+    FreeAndNil(GAppRunClass);
+end;
+
+end.

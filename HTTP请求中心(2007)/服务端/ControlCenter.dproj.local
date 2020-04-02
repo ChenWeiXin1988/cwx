@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2020-04-01 09:36:44.681.pas,C:\Users\jingchao\Documents\RAD Studio\Projects\Unit1.pas=D:\Delphi系统服务\HTTP请求中心(2007)\服务端\uService.pas</Transaction>
+    <Transaction>2020-04-01 09:36:44.681.dfm,C:\Users\jingchao\Documents\RAD Studio\Projects\Unit1.dfm=D:\Delphi系统服务\HTTP请求中心(2007)\服务端\uService.dfm</Transaction>
+    <Transaction>2020-04-01 09:38:29.698.dproj,C:\Users\jingchao\Documents\RAD Studio\Projects\Project2.dproj=D:\Delphi系统服务\HTTP请求中心(2007)\服务端\ControlCenter.dproj</Transaction>
+    <Transaction>2020-04-01 09:43:32.754.pas,D:\Delphi系统服务\HTTP请求中心(2007)\服务端\Unit1.pas=D:\Delphi系统服务\HTTP请求中心(2007)\服务端\public\uHttpEvent.pas</Transaction>
+    <Transaction>2020-04-01 09:46:30.595.pas,D:\Delphi系统服务\HTTP请求中心(2007)\服务端\Unit1.pas=D:\Delphi系统服务\HTTP请求中心(2007)\服务端\public\uServer.pas</Transaction>
+    <Transaction>2020-04-01 13:29:28.726.pas,D:\Delphi系统服务\HTTP请求中心(2007)\服务端\Unit1.pas=D:\Delphi系统服务\HTTP请求中心(2007)\服务端\form\uFrmMain.pas</Transaction>
+    <Transaction>2020-04-01 13:29:28.726.dfm,D:\Delphi系统服务\HTTP请求中心(2007)\服务端\Unit1.dfm=D:\Delphi系统服务\HTTP请求中心(2007)\服务端\form\uFrmMain.dfm</Transaction>
+    <Transaction>2020-04-01 13:49:13.312.pas,D:\Delphi系统服务\HTTP请求中心(2007)\服务端\Unit1.pas=D:\Delphi系统服务\HTTP请求中心(2007)\服务端\public\uAppFactory.pas</Transaction>
+  </Transactions>
+</BorlandProject>

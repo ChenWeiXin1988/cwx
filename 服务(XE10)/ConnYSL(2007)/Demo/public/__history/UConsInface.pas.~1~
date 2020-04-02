@@ -1,0 +1,208 @@
+unit UConsInface;
+
+interface
+uses SysUtils, Windows, IFaceStruc, uDefine;
+const
+  YQSHDLL     =  'YQSHHADWARE.dll';
+type
+{  TCardMessage = array[0..15] of byte; //16字节ic快数据
+  pCardMessage = ^TCardMessage;
+
+  TudpPos = packed record
+    pos_id : integer;
+    IP : array[0..14] of char;
+    bindIp : array[0..14] of char;
+  end;
+  pudpPos = ^TudpPOs;}
+
+  TReadRecord = record
+    Com : byte;
+    IsRead : byte;      //0: read; 1: not read
+    State : byte;      //读出状态请求号
+    PosId : Word;      //机号
+    ConsState : String[2];  //读出当前请求状态
+    Card : Cardinal ;   //卡号；    －挂失为帐号
+    CardMoney : integer;  //卡余额  －改密码为原密码
+    CardSubMoney : Integer;  //卡补助余额
+    CardCons : integer;  //卡消费额 －改密码为现密码，超额消费送密码
+    //电表剩余补助额
+    ConsTime : String[20]; //时间
+    relayLan : byte;
+    FkTime :word;//充值次数
+    ClCard : cardinal;   //脱机存款时的出纳卡号
+    ID : Cardinal;  //传输序号   //2007-5-15 改传输
+    isSub : byte;
+    AceButton : byte; //门禁按钮
+    AceMc : byte;     //门磁
+    //1.3.0.1	DJP	2012-03-22 增加菜品
+    CpID: Word;
+    CpCount: Byte;
+//    OperID: string[4];
+  end;
+  PReadRecord = ^TReadRecord;
+
+  function SetBindIp(aIp:Pchar) : integer;StdCall;external YQSHDLL;
+  function SetTcpPort(aPort:integer) : integer;StdCall; external YQSHDLL;
+  function OpenTcpPort():integer;StdCall;external YQSHDLL;
+  function SetSendIp(aUdpPOs:pudpPos):integer;StdCall;external YQSHDLL;
+
+  {**********************TCP/IP协议**************************************}
+  function SetTcpIpBindIp(aIp:pchar): integer;StdCall;external YQSHDLL;
+  function SetTcpIPPort(aPort:integer) : integer;StdCall;external YQSHDLL;
+  function OpenTcpIPPort():integer;StdCall; external YQSHDLL;
+  function SetTcpIpSendIp(aUdpPOs:pudpPos):integer;StdCall; external YQSHDLL;
+  function EGS_DownTcpIpParms(const PosId,aCom,oldpass,aWatTime:Word;
+      oldip : pchar;aParm:pTcpIpParms;aType:Byte):Integer; StdCall;external YQSHDLL;
+  function CloseTcpIpPort():integer;StdCall; external YQSHDLL;
+  function SetSecurityCode(aCode:word):integer; Stdcall;external YQSHDLL;
+  function SearchTcpPos(const Ip:PChar;aCom,apass:Word;aState:pacessState;
+                 aWatTime:integer):integer; Stdcall;external YQSHDLL;
+  {**********************TCP/IP协议 END***********************************}
+
+  function GetComPort(aCom:integer):integer; StdCall;external YQSHDLL;
+  //function CloseComPort(aCom:integer):integer; StdCall;external YQSHDLL;
+  function CloseAllCom():integer; StdCall; external YQSHDLL;
+  function GetVerion(var aver:pchar) : integer StdCall; external YQSHDLL;
+ function BeginRecive(aCom:integer) : integer; StdCall; external YQSHDLL;
+ function EndRecive(aCom:integer) : integer;StdCall; external YQSHDLL;
+  function ReadInfRecord(var Recv : Pchar;var aLen : integer): integer; StdCall; external YQSHDLL;
+  function WriteinfRecord(Send:pchar):integer; StdCall; external YQSHDLL;
+function ReadInfRecordRec(var aRec : PReadRecord) : integer StdCall;external YQSHDLL;
+function WriteinfRecordRec(aRec : PReadRecord):integer StdCall;external YQSHDLL;
+  {发送响应信息
+
+  }
+  function SetPOSInitial(posid : word; aCom,awatTime:integer):integer;StdCall;  external YQSHDLL;
+  function ChieckState(aId,aCom,awatTime,State:integer) :integer; StdCall; external YQSHDLL;
+ function ChieckStateEx(aId: integer;aCom:integer; aState: pacessState;
+  awatTime: word) :integer StdCall;  external YQSHDLL;
+  function CheckPosTime(PosId:word; aDate:pchar;aCom,aWeek,awatTime:integer): integer; StdCall; external YQSHDLL;
+  //function DownParams(DMoney,TMoney,Cons,daylimit,CardDMoney:integer;PosId:word;aCom,awatTime:integer): integer; StdCall; external YQSHDLL;
+  function DownParams(DMoney,TMoney,Cons,daylimit,CardDMoney:integer;PosId:word;
+    aCom,awatTime:integer;StrGroups:string): integer; StdCall; external YQSHDLL;
+{Dmoney : 定值消费(水控机为计费单位单价)
+ TMOney : 脱机消费限额
+ cons ：消费分组
+ daylimit ：日消费限额
+}
+//function DownPrintConfig(PrintType:Integer;PosID: Word; PrintC: string;aCom:integer;awatTime:Integer):Integer;StdCall; external YQSHDLL;
+function DownPass(aPass,PosId:word;aCom,awatTime:integer): integer;StdCall; external YQSHDLL;
+{下载终端机操作密码}
+function ModifyPosID(aNewPosID:Integer; aCom:Integer; PosId,awatTime:Word):Integer;StdCall; external YQSHDLL;
+{修改Pos机号}
+function InitializePos(aCom:Integer; PosId,awatTime,atype:Word):Integer;StdCall; external YQSHDLL;
+{初始化终端机}
+function Downskpram(pram,posid:word;aCom,awatTime:integer): integer;StdCall; external YQSHDLL;
+{下载水控计时单位}
+function DownCardPass(aPass:pchar; sector,PosId:word;aCom,awatTime:integer): integer;StdCall; external YQSHDLL;
+{下载机器读卡密码，扇区 }
+function DownKeyPass(aType:Byte; aPass: pchar; sector, PosId: word; aCom:integer; awatTime:word): integer; StdCall;external YQSHDLL;
+{下载机器计算卡密Key}
+function DownEnterpriseSN(ASN:Cardinal;AID:Byte; posid: word;aCom:integer; awatTime:word): integer;StdCall; external YQSHDLL;
+{下载企业编号}
+function DownBlackCard(aBlackCard:integer;PosId:word;aType: byte;aCom,awatTime:integer): integer; StdCall; external YQSHDLL;
+{下载黑名单，atype＝0 添加 1 删除 2全部删除}
+function DownBlackPc(aBlackPc:integer;Posid:word;aType:byte;aCom,awatTime:integer):integer;StdCall;external YQSHDLL;
+{下载批次黑名单，atype＝0 添加 1 删除}
+function ExitCnMode(Posid: word;aCom,awatTime:integer): integer;StdCall; external YQSHDLL;
+{离开出纳模式}
+function ProcessFs(aTime,POsid:word;aCom,awatTime:integer):integer;StdCall; external YQSHDLL;
+{放水 atime 时间}
+function DownMealSet(PosId: word; aDate, aEnd: pchar;
+  aBh,aCom,awatTime:integer): integer;StdCall; external YQSHDLL;
+{下载餐次信息
+  adate 开始时间，
+  aend 结束时间，
+  aBh 餐次编号 <255
+}
+
+function DownManTypeLimit(PosId:Word; ID,ManTypeID,Meal1Limit,
+      Meal2Limit,Meal3Limit,Meal4Limit: Byte;aCom:integer;awatTime:integer):integer ;StdCall; external YQSHDLL;
+
+function GetMealSum(posId:word;aDate:pchar;aBh:integer;aType,aCom:integer):integer;StdCall; external YQSHDLL;
+{
+获取餐次消费总额
+  adate ：消费日期
+  aBh ：餐次号
+  atype ：0收adate的abh餐次之前的所有餐次总额 其他：收指定总额数据
+}
+function GetClsum(PosId:word;aDate:pchar;aCom:integer):integer;StdCall; external YQSHDLL;
+{
+ 获取adate日期出纳机总额
+
+}
+function DownRule(aCom,operType,IDtype,ConsTi,NoConsTi:byte;
+         posId,Fconsbegin,Fconsend,Fmoney,Sconsbegin,Sconsend,SMoney,Tconsbegin,
+         Tconsend,Tmoney,Frconsbegin,Frconsend,FrMoney,awatTime:integer): integer;StdCall; external YQSHDLL;
+
+{下载水控器不同消费类型
+  operType : 01：增加规则 02：删除规则 03：删除所有规则
+  idtype : 本规则适用人员身份类型1－255， 255是没有设定特定规则的其他所有身份
+  ConsTi : 消费累计有效时间，累计超过此时间重新使用此规则   0-255分钟
+  NoConsTi : 未消费使用时间          0-255分钟
+  其他四个时间段开始时间和结束时间和单位计费费率
+  时间未0-65535秒，费率为0-65535分      不用时段时间费率填0xff
+}
+function DownPosCp(posid, atype, keybh, jg: word;
+        cpname: pchar;aCom,awatTime:integer):integer;StdCall; external YQSHDLL;
+{
+ 下载菜品名称
+  atype: 0 增加菜品 其他：删除
+  keybh ：终端机键盘编号 0-9
+  cpname ：菜品名称
+}
+function DownSetRepeatTimeLimit(sec: INTEGER; PosID,aCom,awatTime:word):integer;StdCall; external YQSHDLL;
+function DownWhiteList(operID: byte; PosID: Word; cardNumber: INTEGER; ruleID: byte;
+      departGrpID: byte; Name: pchar;aCom,awatTime:word): integer; Stdcall; external YQSHDLL;
+function DownDepartment(operID: byte; PosID: Word; GroupId: byte;
+               departName: pchar;aCom,awatTime:word): integer;Stdcall;  external YQSHDLL;
+function DownCardTimeRule(operID: byte; PosID: Word; ruleID,foreside,rearward: byte;
+      time1, time2: pchar;bellCount,bellrelay:integer;aCom,awatTime:word): integer;StdCall;  external YQSHDLL;
+function DownRingtime(operID: byte; PosID: Word; ruleID: byte;
+                  time: pchar; delayTime:byte;aCom,awatTime:word): integer;StdCall;  external YQSHDLL; //设置响铃时间
+function InCardMode(PosID,aCom,awatTime: Word): integer;StdCall; external YQSHDLL;
+function OutCardMode(PosID,aCom,awatTime: Word): integer;StdCall; external YQSHDLL;
+function ReadIdCard(PosID,aCom,awatTime:Word;var aCard:Cardinal): integer;StdCall;external YQSHDLL;
+
+function SetKqReadPram(PosID,aCom,Sector,PassType,awatTime:Word;Pass:PChar):integer; StdCall; external YQSHDLL;
+function ReadICCardFrKq(PosID,aCom,block,awatTime:Word;var CardM : pCardMessage):integer;STdCall; external YQSHDLL;
+function WriteICCardFrKq(PosID,aCom,block,awatTime:Word;CardM : TCardMessage):integer;StdCall; external YQSHDLL;
+
+function EGS_DownPosParam(const PosID,aCom, awatTime:Word;
+  EGS_PosParam:PS_EGS_PosParam):integer;StdCall; external YQSHDLL;
+function EGS_DownDoorParam(const PosID, aCom, awatTime:Word;
+  EGS_DoorParam:PS_EGS_DoorParam):Integer;stdcall; external YQSHDLL;
+//下载读卡头参数
+function EGS_DownReaderParam(const PosID,aCom, awatTime:Word;
+  EGS_ReaderParam: PS_EGS_ReaderParam):Integer;stdcall; external YQSHDLL;
+//下载门通行时段
+function EGS_DownDoorRule(const PosID,aCom, awatTime:Word;
+  EGS_DoorRule: PS_EGS_DoorRule):Integer;stdcall; external YQSHDLL;
+//下载通行规则
+function EGS_DownCtrlRule(const PosID,aCom, awatTime:Word;
+  EGS_CtrlRule: PS_EGS_CtrlRule):Integer;stdcall; external YQSHDLL;
+//下载门禁人员信息
+function EGS_DownPassRule(const PosID,aCom:Word;  awatTime:DWord;
+  EGS_PassRule: PS_EGS_PassRule):Integer;stdcall; external YQSHDLL;
+//下载假日信息
+function EGS_DownHoliday(const PosID,aCom, awatTime:Word;
+  EGS_Holiday: PS_EGS_Holiday):Integer;stdcall; external YQSHDLL;
+//设置门禁机机号和通讯波特率
+//波特率：0->20KBPS		1->40KBPS		2->50KBPS		3->80KBPS   4->100KBPS	5->5KBPS		6->10KBPS
+function EGS_SetPos(const PosID,aCom, awatTime:Word;
+  NewPosID: Word; BaudRate: Byte):Integer;stdcall; external YQSHDLL;
+//初始化门禁机
+function EGS_PosInitial(const PosID,aCom, awatTime:Word;
+  NewPosID: Word; BaudRate: Byte):Integer;stdcall; external YQSHDLL;
+//门禁开关操作
+function EGS_PosOperate(const PosID,aCom, awatTime:Word;
+  EGS_Switch: PS_EGS_Switch):Integer;stdcall; external YQSHDLL;
+//检测门禁硬件
+function EGS_CheckHardware(const PosID,aCom:Word; awatTime: DWord ;
+  CheckItem:Byte):Integer;stdcall; external YQSHDLL;
+function EGS_DownCheckTime(const PosID,aCom:Word; awatTime: Word;
+  ECTime: TEgsCheckTime):Integer;stdcall; external YQSHDLL;
+    
+implementation
+
+end.

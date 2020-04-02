@@ -1,0 +1,36 @@
+program DataManager;
+
+uses
+  Forms,
+  windows,
+  UMain in 'form\UMain.pas' {fmMain},
+  uObj in 'public\uObj.pas',
+  uVar in 'public\uVar.pas',
+  uLogUtils in 'public\uLogUtils.pas',
+  uDelFiles in 'public\uDelFiles.pas',
+  uPing in 'public\uPing.pas';
+
+{$R *.res}
+var
+  hMutex: DWORD;
+const
+  MB_MINE = MB_OK or MB_ICONINFORMATION or MB_TASKMODAL;
+  MutexName = 'DataManager' ;
+begin
+  hMutex := CreateMutex(nil, TRUE, PChar(MutexName));
+  if (GetLastError = ERROR_ALREADY_EXISTS) then
+  begin
+    Application.MessageBox(PChar('程序运行中，请不要重复启动程序！'),
+      PChar('提示'), MB_OK + MB_ICONWARNING + MB_TOPMOST);
+    ReleaseMutex(hMutex);
+    Exit;
+  end
+  else if hMutex = ERROR_INVALID_HANDLE then                          //检查"YQSH1005IDKQMutex"这个名字是否被其他诸如文件映射、信号灯和事件等对象占用
+    MessageBox(0, '对象被占用，无法启动程序！', '信息',MB_MINE)
+  else begin
+    Application.Initialize;
+    Application.MainFormOnTaskbar := True;
+    Application.CreateForm(TfmMain, fmMain);
+    Application.Run;
+  end;
+end.

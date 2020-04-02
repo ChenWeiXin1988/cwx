@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2018-01-05 11:41:00.844.dproj,D:\workspace2007\新建文件夹\Project16.dproj=D:\workspace2007\新建文件夹\Project16.dproj</Transaction>
+    <Transaction>2018-01-08 09:09:17.305.dproj,D:\workspace2007\新建文件夹\Project16.dproj=D:\workspace2007\新建文件夹\Install.dproj</Transaction>
+    <Transaction>2018-01-08 09:10:50.416.dproj,D:\workspace2007\新建文件夹\Install.dproj=E:\Svn\XM1710007一起生活营养出品系统项目\03开发库\01源代码\服务源码\安装程序\Install.dproj</Transaction>
+    <Transaction>2018-01-08 09:11:09.831.pas,D:\workspace2007\新建文件夹\Unit21.pas=E:\Svn\XM1710007一起生活营养出品系统项目\03开发库\01源代码\服务源码\安装程序\Unit21.pas</Transaction>
+    <Transaction>2018-01-08 09:11:09.831.dfm,D:\workspace2007\新建文件夹\Unit21.dfm=E:\Svn\XM1710007一起生活营养出品系统项目\03开发库\01源代码\服务源码\安装程序\Unit21.dfm</Transaction>
+    <Transaction>2018-01-08 09:32:56.638.dproj,E:\Svn\XM1710007一起生活营养出品系统项目\03开发库\01源代码\服务源码\安装程序\Install.dproj=E:\Svn\XM1710007一起生活营养出品系统项目\03开发库\01源代码\服务源码\安装程序\InstallProject.dproj</Transaction>
+  </Transactions>
+</BorlandProject>

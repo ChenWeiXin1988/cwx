@@ -1,0 +1,26 @@
+unit uPublic;
+
+interface
+
+uses Winapi.Windows;
+
+//防止切换输入法等引起程序假死     1.3.7.0
+procedure ProcessMessage;
+//写日志
+procedure systemLog(Msg: string);
+
+implementation
+
+//1.3.7.0   防止切换输入法等引起程序假死
+procedure ProcessMessage;
+var
+  Msg: TMsg;
+begin
+  if PeekMessage(Msg, 0, 0, 0, PM_REMOVE) then
+  begin
+    TranslateMessage(Msg);
+    DispatchMessage(Msg);
+  end;
+end;
+
+end.

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899-12-30 00:00:00.000.089,=E:\Svn\XM1807009 厦门宸香食品有限公司项目\03开发库\01源代码\餐台本地数据库同步服务\public\uPing.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.dproj,D:\workspace2007\新建文件夹\DSServise.dproj=D:\workspace2007\新建文件夹\DSProgram.dproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.dfm,D:\workspace2007\新建文件夹\Unit19.dfm=D:\workspace2007\新建文件夹\UMain.dfm</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.dproj,D:\workspace2007\新建文件夹\Project13.dproj=D:\workspace2007\新建文件夹\DSServise.dproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.dproj,D:\workspace2007\新建文件夹\DSProgram.dproj=E:\Svn\XM1603008 智慧餐台项目(火锅版与园区版合并版本)\03开发库\01源代码\数据交互服务\DSProgram.dproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.dfm,D:\workspace2007\新建文件夹\UMain.dfm=E:\Svn\XM1603008 智慧餐台项目(火锅版与园区版合并版本)\03开发库\01源代码\数据交互服务\form\UMain.dfm</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.724,D:\Delphi系统服务\字典表数据同步\DSProgram.dproj=D:\Delphi系统服务\字典表数据同步\DataManager.dproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.pas,D:\workspace2007\新建文件夹\Unit19.pas=D:\workspace2007\新建文件夹\UMain.pas</Transaction>
+    <Transaction>2020-03-31 14:12:21.724,D:\Delphi系统服务\字典表数据同步\DataManager.dproj=D:\Delphi系统服务\字典表数据同步\DataManager.dproj</Transaction>
+    <Transaction>2020-03-31 16:21:49.016,=D:\Delphi系统服务\字典表数据同步\public\uPublic.pas</Transaction>
+  </Transactions>
+</BorlandProject>

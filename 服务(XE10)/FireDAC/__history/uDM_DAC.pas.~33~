@@ -1,0 +1,101 @@
+unit uDM_DAC;
+
+interface
+
+uses
+  SysUtils, Classes, FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error,
+  FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def, FireDAC.Phys,
+  FireDAC.Comp.Client, FireDAC.Phys.MSSQLDef, FireDAC.Phys.ODBCBase,
+  FireDAC.Phys.MSSQL, FireDAC.VCLUI.Wait, FireDAC.Comp.UI, FireDAC.Stan.Pool,
+  FireDAC.Stan.Async, Data.DB, FireDAC.Stan.Param, FireDAC.DatS,
+  FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Comp.DataSet, FireDAC.Phys.MySQLDef,
+  FireDAC.Phys.MySQL, FireDAC.Stan.ExprFuncs, FireDAC.Phys.SQLiteDef,
+  FireDAC.Phys.SQLite, FireDAC.Phys.OracleDef, FireDAC.Phys.Oracle;
+
+type
+  TDM = class(TDataModule)
+    FDManager: TFDManager;
+    SQLLink: TFDPhysMSSQLDriverLink;
+    WaitCursor: TFDGUIxWaitCursor;
+    FDConnection: TFDConnection;
+    FDQuery: TFDQuery;
+    MYSQLLINK: TFDPhysMySQLDriverLink;
+    SQLITELINK: TFDPhysSQLiteDriverLink;
+    ORACLELINK: TFDPhysOracleDriverLink;
+    procedure DataModuleCreate(Sender: TObject);
+  private
+    { Private declarations }
+    function GetCode(iType: Integer; var sCode: string): Boolean;
+  public
+    { Public declarations }
+    //0 Sqlserver 1 Mysql 2 Sqlite 3 Oracle д╛хо0
+    FDBLX: Integer;
+    function DBChanged(iType: integer): Boolean;
+  end;
+
+var
+  DM: TDM;
+
+implementation
+
+{$R *.dfm}
+
+procedure TDM.DataModuleCreate(Sender: TObject);
+begin
+  FDBLX:= 0;
+  FDConnection.ConnectionDefName:= 'MSSQL_Pool';
+end;
+
+function TDM.DBChanged(iType: integer): Boolean;
+var
+  sCode: string;
+begin
+  Result:= False;
+  if iType= FDBLX then
+  begin
+    Result:= True;
+    Exit;
+  end;
+  FDConnection.Connected:= False;
+  try
+    try
+      if GetCode(iType, sCode) then
+      begin
+        FDConnection.ConnectionDefName:= sCode;
+        FDBLX:= iType;
+        Result:= True;
+      end;
+    except
+
+    end;
+  finally
+//    FDConnection.Connected
+  end;
+end;
+
+function TDM.GetCode(iType: Integer; var sCode: string): Boolean;
+begin
+  Result:= False;
+  case iType of
+    0: begin
+      sCode:= 'MSSQL_Pool';
+      Result:= True;
+    end;
+    1: begin
+      sCode:= 'MySQL_Pool';
+      Result:= True;
+    end;
+    2: begin
+      sCode:= 'SQLite_Pool';
+      Result:= True;
+    end;
+    3: begin
+      sCode:= 'Oracle_Pool';
+      Result:= True;
+    end;
+  else
+    //
+  end;
+end;
+
+end.

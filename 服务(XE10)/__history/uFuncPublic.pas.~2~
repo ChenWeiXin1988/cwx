@@ -1,0 +1,10 @@
+unit uFuncPublic;
+
+interface
+
+//–¥»’÷æ
+    procedure systemLog(Msg: string);
+
+implementation
+
+end.

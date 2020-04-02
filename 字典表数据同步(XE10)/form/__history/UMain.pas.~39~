@@ -1,0 +1,307 @@
+unit UMain;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, RzTray, Menus, Registry, ShellAPI, uVar, Vcl.ExtCtrls, system.ImageList,
+  Vcl.ImgList, RzBHints, uDelFiles,uPing;
+
+type
+  TfmMain = class(TForm)
+    rztrycn1: TRzTrayIcon;
+    pm1: TPopupMenu;
+    N2: TMenuItem;
+    N1: TMenuItem;
+    tmr1: TTimer;
+    il1: TImageList;
+    procedure FormCreate(Sender: TObject);
+    procedure N1Click(Sender: TObject);
+    procedure N2Click(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure tmr1Timer(Sender: TObject);
+    procedure rztrycn1BalloonHintClick(Sender: TObject);
+    procedure rztrycn1BalloonHintClose(Sender: TObject);
+  private
+    { Private declarations }
+    bShowAgain: Boolean;
+    function SetReg(aReg: boolean): Boolean;
+    procedure SetState(const bValue: Boolean);
+  public
+    { Public declarations }
+  end;
+
+  TUpThread = class(TThread)
+  private
+    _PAUSE_FLAG: Boolean;
+    bUpLoadFlow: Boolean;
+    Fping: Tping;
+    UpdateList: TStringList;      //字典表
+  protected
+    procedure Execute; override;
+  public
+    function Paused: Boolean;
+    procedure Pause;               //暂停
+    procedure Goon;                //继续
+    constructor Create(AList, Blist: string; _Sub: Boolean = False);
+    destructor Destroy; override;
+    function UpdateTables: Boolean;
+  end;
+
+var
+  fmMain: TfmMain;
+  UpThread: TUpThread;      //更新数据到本地
+  iResetPool: Integer;   //连接服务数据库失败后重置，线程中失败后须大于15s重置，否则重置时若有其它连接存在，FDMANAGER重置会死锁
+
+implementation
+
+uses uPublic;
+
+{$R *.dfm}
+
+procedure TfmMain.FormCreate(Sender: TObject);
+var
+  sPath: string;
+  dDateTime: Tdatetime;
+begin
+  GAppRunClass := TAppRunClass.Create;
+  SetReg(true);  //判断是否写入注册表-开机延时启动
+  SendMessage(Handle, WM_SYSCOMMAND, SC_MINimize, 0);  //最小化
+  if not GAppRunClass.ReadParam then
+  begin
+    SystemLog('ReadParam Error');
+  end;
+  GAppRunClass.FDAcitve := True;    //连接数据库
+  GAppRunClass.connState := SetState;
+  UpThread := TUpThread.Create(GAppRunClass.RunPara.sUpDateListStr, GAppRunClass.RunPara.sUpLoadListStr);
+  iResetPool := 0;
+
+  try
+    dDateTime := now - 15;
+    sPath := ExtractFilePath(Application.ExeName) + 'log';
+    ListPath(0, sPath, dDateTime, 1);
+  except
+  end;
+end;
+
+procedure TfmMain.FormDestroy(Sender: TObject);
+begin
+  FreeAndNil(GAppRunClass);
+  if UpThread <> nil then
+  begin
+    UpThread.Terminate;
+    UpThread.WaitFor;
+    FreeandNil(UpThread);
+  end;
+end;
+
+procedure TfmMain.N1Click(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TfmMain.N2Click(Sender: TObject);
+var
+  cFile: string;
+begin
+  cFile := Format('%s_%s%s', ['Log\', FormatDateTime('YYYYMMDD', Now)]);
+  if FileExists(cFile) then
+    ShellExecute(0, 'open', pChar(cFile), nil, nil, SW_SHOWNORMAL);
+end;
+
+procedure TfmMain.rztrycn1BalloonHintClick(Sender: TObject);
+begin
+  rztrycn1.HideBalloonHint;
+  bShowAgain := True; //手动取消的直到重连成功后不再提示
+end;
+
+procedure TfmMain.rztrycn1BalloonHintClose(Sender: TObject);
+begin
+  if bShowAgain and rztrycn1.Animate then
+  begin
+    rztrycn1.ShowBalloonHint('提示', '数据连接已断开！', bhiWarning);
+  end;
+end;
+
+function TfmMain.SetReg(aReg: boolean): Boolean;
+var
+  regf: Tregistry;
+  key: string;
+  sPath, sValue: string;
+  bValue: Boolean;
+begin
+  Result := False;
+  regf := TRegistry.Create;
+  try
+    try
+      key := 'SOFTWARE\Microsoft\Windows\CurrentVersion\Run';
+      regf.RootKey := HKEY_LOCAL_MACHINE;
+      if regf.KeyExists(key) then
+      begin
+        if regf.OpenKey(key, FALSE) then
+        begin
+          sPath := Format('%s %s %s', [Application.ExeName, '-zd', '30000']);       //延时启动时间
+          sValue := Trim(regf.ReadString(sKeyName));
+          bValue := sValue = sPath;
+          if aReg then
+          begin
+            if not bValue then
+            begin
+              regf.WriteString(sKeyName, sPath);
+            end;
+          end
+          else
+          begin
+            if bValue then
+              regf.DeleteValue(sKeyName);
+          end;
+          Result := True;
+        end;
+      end;
+      GAppRunClass.Log.AddLog('操作注册表开机启动 - [Success]', 1);
+    except
+      on E: Exception do
+      begin
+        GAppRunClass.Log.AddLog(Format('操作注册表开机启动 - [Failure:%s]', [E.Message]), 1);
+      end;
+    end;
+  finally
+    regf.Free;
+  end;
+end;
+
+procedure TfmMain.SetState(const bValue: Boolean);
+begin
+  if rztrycn1.Animate = not bValue then
+    Exit;
+  rztrycn1.Animate := not bValue;
+  rztrycn1.IconIndex := 0;
+
+  if rztrycn1.Animate then
+    rztrycn1.ShowBalloonHint('提示', '数据连接已断开！', bhiWarning)
+  else
+    rztrycn1.HideBalloonHint;
+  bShowAgain := True;
+end;
+
+procedure TfmMain.tmr1Timer(Sender: TObject);
+begin
+  Application.Title := 'delphi';
+end;
+
+{ TUpThread }
+
+constructor TUpThread.Create(AList, Blist: string; _Sub: Boolean);
+begin
+  _PAUSE_FLAG := _Sub;
+  inherited Create(False);
+  UpdateList := TStringList.Create;
+
+  UpdateList.StrictDelimiter := true; //空格不切割
+
+  UpdateList.CommaText := AList;     //字典表
+
+  Fping :=  Tping.create;
+end;
+
+destructor TUpThread.Destroy;
+begin
+  FreeAndNil(UpdateList);
+  FreeAndNil(Fping);
+  inherited;
+end;
+
+procedure TUpThread.Execute;
+var
+  LastUpdate: Integer;
+  iLoop: Integer;
+  str :string;
+begin
+  inherited;
+  LastUpdate := 0;
+  iLoop := 0;
+  while (not Terminated) do
+  begin
+    Application.ProcessMessages;
+    if _PAUSE_FLAG then
+    begin
+      Sleep(200);
+      Continue;
+    end;
+
+    //判断是否能正常ping通服务器SQL Server地址
+    if not Fping.pinghost(GAppRunClass.RunPara.sSDBServer,str) then
+    begin
+      GAppRunClass.FDAcitve := False;
+      Sleep(200);
+      Continue;
+    end;
+
+    try
+      if not GAppRunClass.FDAcitve then
+      begin
+        GAppRunClass.FDAcitve := True;
+        Sleep(300);
+        Continue;
+      end;
+
+      if GetTickCount - LastUpdate > iLoop then
+      begin
+        try
+          if UpdateTables then
+          begin
+            iLoop := 10000;
+          end
+          else
+            iLoop := 15000;
+        finally
+          LastUpdate := GetTickCount;
+          sleep(60);
+        end;
+      end;
+
+      if not GAppRunClass.FDAcitve then
+        continue;
+    except
+      on E: exception do
+      begin
+        GAppRunClass.Log.AddLog('TUpThread' + e.Message, 1);
+        Sleep(60);
+      end;
+    end;
+  end;
+end;
+
+procedure TUpThread.Goon;
+begin
+  _PAUSE_FLAG := False;
+end;
+
+procedure TUpThread.Pause;
+begin
+  _PAUSE_FLAG := TRUE;
+end;
+
+function TUpThread.Paused: Boolean;
+begin
+  Result := _PAUSE_FLAG;
+end;
+
+function TUpThread.UpdateTables: Boolean;
+var
+  i: Integer;
+begin
+  Result := True;
+  try
+    //循环字典表
+    for i := 0 to UpdateList.Count - 1 do
+    begin
+      //更新字典表数据
+      Result := Result and GAppRunClass.UpdateTable(UpdateList[i]);
+    end;
+  except
+  end;
+end;
+
+end.
+

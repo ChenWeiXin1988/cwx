@@ -1,0 +1,36 @@
+object DM: TDM
+  OldCreateOrder = False
+  Height = 222
+  Width = 420
+  object FDManager: TFDManager
+    ConnectionDefFileName = 'Driver.ini'
+    FormatOptions.AssignedValues = [fvMapRules]
+    FormatOptions.OwnMapRules = True
+    FormatOptions.MapRules = <>
+    Active = True
+    Left = 56
+    Top = 40
+  end
+  object SQLLink: TFDPhysMSSQLDriverLink
+    Left = 208
+    Top = 40
+  end
+  object WaitCursor: TFDGUIxWaitCursor
+    Provider = 'Forms'
+    Left = 136
+    Top = 40
+  end
+  object FDConnection: TFDConnection
+    Params.Strings = (
+      'ConnectionDef=MSSQL')
+    FetchOptions.AssignedValues = [evMode]
+    FetchOptions.Mode = fmAll
+    Left = 56
+    Top = 112
+  end
+  object FDQuery: TFDQuery
+    Connection = FDConnection
+    Left = 128
+    Top = 112
+  end
+end

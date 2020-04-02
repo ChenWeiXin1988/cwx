@@ -1,0 +1,65 @@
+unit uService;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, SvcMgr, Dialogs,
+  uAppFactory;
+
+type
+  TCenterServer = class(TService)
+    procedure ServiceStart(Sender: TService; var Started: Boolean);
+    procedure ServiceStop(Sender: TService; var Stopped: Boolean);
+    procedure ServiceExecute(Sender: TService);
+  private
+    { Private declarations }
+  public
+    function GetServiceController: TServiceController; override;
+    { Public declarations }
+  end;
+
+var
+  CenterServer: TCenterServer;
+  AppFactory: TAppFactory;
+
+implementation
+
+uses uPublic, uFrmMain;
+
+{$R *.DFM}
+
+procedure ServiceController(CtrlCode: DWord); stdcall;
+begin
+  CenterServer.Controller(CtrlCode);
+end;
+
+function TCenterServer.GetServiceController: TServiceController;
+begin
+  Result := ServiceController;
+end;
+
+procedure TCenterServer.ServiceExecute(Sender: TService);
+begin
+  while not Terminated do
+  begin
+    systemLog('ServiceExecute');
+    Sleep(5000);
+  end;
+end;
+
+procedure TCenterServer.ServiceStart(Sender: TService; var Started: Boolean);
+begin
+  AppFactory:= TAppFactory.Create;
+  Started:= True;
+  systemLog('ServiceStart');
+end;
+
+procedure TCenterServer.ServiceStop(Sender: TService; var Stopped: Boolean);
+begin
+  if Assigned(AppFactory) then
+    FreeAndNil(AppFactory);
+  Stopped:= True;
+  systemLog('ServiceStop');
+end;
+
+end.

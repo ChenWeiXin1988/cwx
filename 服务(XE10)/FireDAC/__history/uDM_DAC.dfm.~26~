@@ -1,0 +1,49 @@
+object DM: TDM
+  OldCreateOrder = False
+  OnCreate = DataModuleCreate
+  Height = 292
+  Width = 458
+  object FDManager: TFDManager
+    ConnectionDefFileName = 'Driver.ini'
+    FormatOptions.AssignedValues = [fvMapRules]
+    FormatOptions.OwnMapRules = True
+    FormatOptions.MapRules = <>
+    Active = True
+    Left = 56
+    Top = 40
+  end
+  object SQLLink: TFDPhysMSSQLDriverLink
+    Left = 240
+    Top = 32
+  end
+  object WaitCursor: TFDGUIxWaitCursor
+    Provider = 'Forms'
+    Left = 136
+    Top = 40
+  end
+  object FDConnection: TFDConnection
+    Params.Strings = (
+      'ConnectionDef=MSSQL_Pool')
+    FetchOptions.AssignedValues = [evMode]
+    FetchOptions.Mode = fmAll
+    Left = 56
+    Top = 112
+  end
+  object FDQuery: TFDQuery
+    Connection = FDConnection
+    Left = 128
+    Top = 112
+  end
+  object MYSQLLINK: TFDPhysMySQLDriverLink
+    Left = 240
+    Top = 88
+  end
+  object SQLITELINK: TFDPhysSQLiteDriverLink
+    Left = 240
+    Top = 144
+  end
+  object ORACLELINK: TFDPhysOracleDriverLink
+    Left = 320
+    Top = 152
+  end
+end

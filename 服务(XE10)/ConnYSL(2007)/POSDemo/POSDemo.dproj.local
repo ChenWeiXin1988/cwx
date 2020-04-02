@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2017-08-16 10:18:24.702.pas,C:\Users\jingchao\Documents\RAD Studio\Projects\Unit1.pas=C:\Users\jingchao\Desktop\CRC16\Unit1.pas</Transaction>
+    <Transaction>2017-08-16 10:18:24.702.dfm,C:\Users\jingchao\Documents\RAD Studio\Projects\Unit1.dfm=C:\Users\jingchao\Desktop\CRC16\Unit1.dfm</Transaction>
+    <Transaction>2017-08-16 10:18:26.812.dproj,C:\Users\jingchao\Documents\RAD Studio\Projects\Project1.dproj=C:\Users\jingchao\Desktop\CRC16\Project1.dproj</Transaction>
+    <Transaction>2017-11-16 10:09:29.892.dproj,F:\SVN\XM1603008 智慧餐台项目(火锅版与园区版合并版本)\03开发库\01源代码\ConnYSL\POSDemo\Project1.dproj=F:\SVN\XM1603008 智慧餐台项目(火锅版与园区版合并版本)\03开发库\01源代码\ConnYSL\POSDemo\POSDemo.dproj</Transaction>
+  </Transactions>
+</BorlandProject>

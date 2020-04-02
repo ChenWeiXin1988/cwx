@@ -1,0 +1,36 @@
+unit uConnMJKJ;
+
+interface
+
+const
+  ReadCardDllName = 'ConnMJKJ.dll';
+
+type
+  {扣款返回结构体}
+  TPayRet= packed record
+    RetCode: Word;
+    SerialNo: PChar;
+    Cmoney: Cardinal;
+    Balance: Cardinal;
+  end;
+  PPayRet = ^TPayRet;
+
+  //打开端口
+  function MJKJ_OpenPort(ComPort:Byte):Boolean;stdcall
+    ; external ReadCardDllName;
+    
+  //关闭端口
+  function MJKJ_ClosePort:Boolean;stdcall
+    ; external ReadCardDllName;
+    
+  //读卡
+  function MJKJ_ReadCard(var SerialNo:string; var Name: string;
+     Balance : Cardinal): Byte; stdcall ; external ReadCardDllName;
+    
+  //扣费
+  function MJKJ_Consume(ARet: PPayRet):byte; stdcall
+    ; external ReadCardDllName;
+
+implementation
+
+end.

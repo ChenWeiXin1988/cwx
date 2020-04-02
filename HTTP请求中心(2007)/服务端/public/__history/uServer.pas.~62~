@@ -1,0 +1,162 @@
+unit uServer;
+
+interface
+
+uses
+  iocp, iocp.Http, iocp.Utils.Hash, SysUtils, Classes, iocp.Http.WebSocket;
+
+type
+  PMethod = ^TMethod;
+
+  TOnProcRequest= function(Request: TIocpHttpRequest; Response: TIocpHttpResponse): Boolean of object;
+  TOnRecvBuffer= procedure(const pvClientContext: TIocpContext; buf: Pointer; len: Cardinal; errCode: integer) of object;
+  TOnAccept= procedure(pvSocket: THandle; const pvAddr: string; pvPort: Word; var vAllowAccept: Boolean) of object;
+  TOnDisAccept= procedure(const Context: TIocpContext) of object;
+
+  TCenterServer= class(TObject)
+  private
+    FWebService: TIocpHttpServer;
+    FProcList: TStringHash;
+  protected
+    function isDestroying: Boolean;
+    procedure doRequest(Sender: TIocpHttpServer; request: TIocpHttpRequest; response: TIocpHttpResponse);
+    procedure doWebSocketRequest(Sender: TIocpWebSocketServer; request: TIocpWebSocketRequest; response: TIocpWebSocketResponse);
+    procedure doFreeProcItem(item: PHashItem);
+  public
+    FStickRef: Integer;
+    constructor Create(httpPort: Word); reintroduce;
+    destructor Destroy; override;
+    procedure RegHttpProc(const URI: string; const Proc: TOnProcRequest);
+    procedure RegSocketProc(const OnRecvBuffer: TOnRecvBuffer; const onAccept: TOnAccept; const onDisAccept: TOnDisAccept);
+    procedure Start;
+    procedure Stop;
+  end;
+
+var
+  GURL: string;
+
+implementation
+
+uses uPublic;
+
+{ TCenterServer }
+
+constructor TCenterServer.Create(httpPort: Word);
+begin
+  FWebService:= TIocpHttpServer.Create(nil);
+  FWebService.ListenPort:= httpPort;
+  FWebService.UploadMaxDataSize:= 1024* 1024;
+  FWebService.MaxTaskWorker:= 64;
+  FWebService.MaxContextPoolSize:= 1;
+  FWebService.OnHttpRequest:= doRequest;
+
+  FProcList:= TStringHash.Create();
+  FProcList.OnFreeItem:= doFreeProcItem;
+end;
+
+destructor TCenterServer.Destroy;
+begin
+  try
+    Stop;
+    if Assigned(FWebService) then
+      FreeAndNil(FWebService);
+    if Assigned(FProcList) then
+      FreeAndNil(FProcList);
+  except
+
+  end;
+  inherited;
+end;
+
+procedure TCenterServer.doFreeProcItem(item: PHashItem);
+begin
+  if item<> nil then
+    Dispose(Pointer(item.Value));
+end;
+
+procedure TCenterServer.doRequest(Sender: TIocpHttpServer;
+  request: TIocpHttpRequest; response: TIocpHttpResponse);
+var
+  sMethod: string;
+  index: Number;
+begin
+  systemLog(' in');
+  if request.URI<> GURL then
+  begin
+    response.ErrorRequest(404);
+    Exit;
+  end;
+  sMethod:= getParam(request, 'method');
+//  //接口验证 是否存在该接口
+//  index:= FProcList.ValueOf(LowerCase(string('validation')));
+//  if index<> -1 then
+//  begin
+//    if not TOnProcRequest(PMethod(Pointer(index))^)(request, response) then
+//      Exit;
+//  end;
+  index:= FProcList.ValueOf(LowerCase(string(sMethod)));
+  if index<> -1 then
+  begin
+    TOnProcRequest(PMethod(Pointer(index))^)(request, response);
+  end
+  else
+  begin
+    response.ErrorRequest(404);
+  end;
+end;
+
+procedure TCenterServer.doWebSocketRequest(Sender: TIocpWebSocketServer;
+  request: TIocpWebSocketRequest; response: TIocpWebSocketResponse);
+var
+  S: TMemoryStream;
+  Data: string;
+begin
+  S:= TMemoryStream.Create;
+  try
+    Data:= request.DataString(hct_UTF8);
+    S.Write(Data[1], Length(Data) {$IFDEF UNICODE} sh1 1 {$ENDIF});
+    S.Position:= 0;
+    response.Send(S, wso_Text);
+  finally
+    S.Free;
+  end;
+  response.Send(request.DataString());
+end;
+
+function TCenterServer.isDestroying: Boolean;
+begin
+  Result:= (not Assigned(Self));
+end;
+
+procedure TCenterServer.RegHttpProc(const URI: string;
+  const Proc: TOnProcRequest);
+var
+  P: PMethod;
+begin
+  if Length(URI)= 0 then
+    Exit;
+  if Assigned(Proc) then
+  begin
+    New(P);
+    P^:= TMethod(Proc);
+    FProcList.Add(LowerCase(URI), Integer(P));
+  end;
+end;
+
+procedure TCenterServer.RegSocketProc(const OnRecvBuffer: TOnRecvBuffer;
+  const onAccept: TOnAccept; const onDisAccept: TOnDisAccept);
+begin
+  //
+end;
+
+procedure TCenterServer.Start;
+begin
+  FWebService.Open;
+end;
+
+procedure TCenterServer.Stop;
+begin
+  FWebService.Close;
+end;
+
+end.

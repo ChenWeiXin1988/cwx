@@ -1,0 +1,126 @@
+object FrmMain: TFrmMain
+  Left = 0
+  Top = 0
+  Caption = 'POS'#27169#25311#22120
+  ClientHeight = 486
+  ClientWidth = 878
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  OnCreate = FormCreate
+  PixelsPerInch = 96
+  TextHeight = 13
+  object btn6: TButton
+    Left = 334
+    Top = 25
+    Width = 100
+    Height = 50
+    Caption = #35835#21345'-0'#25104#21151
+    TabOrder = 0
+    OnClick = btn6Click
+  end
+  object btn7: TButton
+    Left = 490
+    Top = 1
+    Width = 100
+    Height = 50
+    Caption = #25903#20184'-0'#25104#21151
+    TabOrder = 1
+    OnClick = btn7Click
+  end
+  object btn8: TButton
+    Left = 190
+    Top = 81
+    Width = 100
+    Height = 50
+    Caption = #20851#38381#20018#21475
+    TabOrder = 2
+    OnClick = btn8Click
+  end
+  object btn9: TButton
+    Left = 190
+    Top = 25
+    Width = 100
+    Height = 50
+    Caption = #25171#24320#20018#21475
+    TabOrder = 3
+    OnClick = btn9Click
+  end
+  object btn10: TButton
+    Left = 642
+    Top = 25
+    Width = 100
+    Height = 50
+    Caption = #26597#35810'-0'#25104#21151
+    TabOrder = 4
+    OnClick = btn10Click
+  end
+  object mmo1: TMemo
+    Left = 0
+    Top = 176
+    Width = 878
+    Height = 310
+    Align = alBottom
+    TabOrder = 5
+    OnChange = mmo1Change
+  end
+  object btn2: TButton
+    Left = 490
+    Top = 57
+    Width = 100
+    Height = 50
+    Caption = #25903#20184'-14'#19981#36275
+    TabOrder = 6
+    OnClick = btn2Click
+  end
+  object btn3: TButton
+    Left = 642
+    Top = 81
+    Width = 100
+    Height = 50
+    Caption = #26597#35810'-1'#22833#36133
+    TabOrder = 7
+    OnClick = btn3Click
+  end
+  object cbb_COMS: TComboBox
+    Left = 22
+    Top = 25
+    Width = 145
+    Height = 28
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -15
+    Font.Name = #24494#36719#38597#40657
+    Font.Style = []
+    ItemHeight = 20
+    ItemIndex = 0
+    ParentFont = False
+    TabOrder = 8
+    Text = 'COM1'
+    Items.Strings = (
+      'COM1'
+      'COM2')
+  end
+  object btn4: TButton
+    Left = 334
+    Top = 81
+    Width = 100
+    Height = 50
+    Caption = #35835#21345'-5'#31105#29992
+    TabOrder = 9
+    OnClick = btn1Click
+  end
+  object btn1: TButton
+    Left = 490
+    Top = 113
+    Width = 100
+    Height = 50
+    Caption = #25903#20184'-14'#23494#30721
+    TabOrder = 10
+    OnClick = btn2Click
+  end
+end

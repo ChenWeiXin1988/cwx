@@ -1,0 +1,16 @@
+object Sync_Server: TSync_Server
+  OldCreateOrder = False
+  OnCreate = ServiceCreate
+  AllowStop = False
+  DisplayName = 'Sync_Server'
+  Interactive = True
+  BeforeInstall = ServiceBeforeInstall
+  AfterInstall = ServiceAfterInstall
+  BeforeUninstall = ServiceBeforeUninstall
+  AfterUninstall = ServiceAfterUninstall
+  OnContinue = ServiceContinue
+  OnExecute = ServiceExecute
+  OnPause = ServicePause
+  Height = 352
+  Width = 724
+end

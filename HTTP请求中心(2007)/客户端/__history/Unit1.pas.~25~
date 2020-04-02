@@ -1,0 +1,88 @@
+unit Unit1;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,Unit4,
+  Dialogs, StdCtrls, Mask, RzEdit, RzLabel, ExtCtrls,Unit2,Unit5,
+  ActnList,uVar,uFrmDish;
+
+type
+  TForm21 = class(TForm)
+    btnHeart: TButton;
+    btnServerTime: TButton;
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure btnHeartClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form21: TForm21;
+
+implementation
+
+uses superobject;
+
+{$R *.dfm}
+
+procedure TForm21.btnHeartClick(Sender: TObject);
+var
+  Tjson, Vjson: ISuperObject;
+  sOut: string;
+  aparam: TRunPara;
+  cAmout: string;
+  iCount: string;
+  bLine :Boolean;
+begin
+  bLine := false;
+  Vjson := SO();
+  try
+    Vjson.S['poscode'] := '35';
+    if not GAppRunClass.Info_POSt(sOut, 'cwx.heart', Vjson.AsString) then
+      Exit;
+    Tjson := SO(sOut);
+    if Tjson = nil then
+      Exit;
+    try
+      if Tjson['public_response']['code'].AsString = '9000' then
+      begin
+        bLine := Tjson['private_response']['isline'].AsString = '1';
+        cAmout := Tjson['private_response']['offline_amount'].AsString;
+        iCount := Tjson['private_response']['offline_num'].AsString;
+
+        aparam := Gapprunclass.RunParaEX;
+        if (aparam.Se_offline_amount <> cAmout) or (aparam.SE_offline_num <> iCount) then
+        begin
+          aparam.Se_offline_amount := cAmout;
+          aparam.SE_offline_num := iCount;
+//          GAppRunClass.RunPara := aparam;
+          GAppRunClass.SavePara_Smart(aparam);
+        end;
+      end;
+    except
+
+    end;
+  finally
+    Vjson := nil;
+    Tjson := nil;
+    blinestate := bLine;
+  end;
+end;
+
+procedure TForm21.FormCreate(Sender: TObject);
+begin
+  GAppRunClass := TAppRunClass.Create;
+  GAppRunClass.ReadPara;
+end;
+
+procedure TForm21.FormDestroy(Sender: TObject);
+begin
+  if Assigned(GAppRunClass) then
+    FreeAndNil(GAppRunClass);
+end;
+
+end.

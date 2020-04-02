@@ -1,0 +1,16 @@
+program Demo_BSKJ;
+
+uses
+  Forms,
+  ufrmMain in 'frm\ufrmMain.pas' {frmMain},
+  uConnBSKJ in 'public\uConnBSKJ.pas',
+  uLogUtils in 'public\uLogUtils.pas';
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TfrmMain, frmMain);
+  Application.Run;
+end.

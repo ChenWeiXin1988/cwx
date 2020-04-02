@@ -1,0 +1,101 @@
+unit uConnBSKJ;
+
+interface
+
+const
+  ReadCard_Dll_BSJK_Name = 'ConnBSJK.dll';
+
+  //开启服务
+  function BSJK_OpenPort(sIn: WideString): Boolean; stdcall
+    ; external ReadCard_Dll_BSJK_Name;
+    
+  //关闭服务
+  function BSJK_ClosePort: Boolean; stdcall
+    ; external ReadCard_Dll_BSJK_Name;
+    
+  //读卡信息
+  function BSJK_ReadCard(var sOut: WideString): integer; stdcall
+    ; stdcall ; external ReadCard_Dll_BSJK_Name;
+    
+  //流水上传
+  function BSJK_Consume(sIn: WideString; var sOut: WideString): Integer; stdcall
+    ; external ReadCard_Dll_BSJK_Name;
+
+type
+  TBSJKReader = class(TObject)
+  private
+    FCom         : Word;
+    FBaudRate    : Cardinal;
+    FHostAddress : string;
+    FHostProtocol: string;
+    FModuleName  : string;
+    FServiceName : string;
+    FHostPort    : Cardinal;
+    Fusername    : string;
+    Fpassword    : string;
+    FClasscode   : string;
+    FBalancecode : string;
+    FPccode      : string;
+  protected
+    function OpenPort(sIn: WideString):Boolean;
+    procedure ClosePort;
+  public
+    constructor Create(AComPort: Word);
+    destructor Destroy; override;
+
+    property Com          : Word     read FCom           write FCom;
+    property BaudRate     : Cardinal read FBaudRate      write FBaudRate;
+    property HostAddress  : string   read FHostAddress   write FHostAddress;
+    property HostProtocol : string   read FHostProtocol  write FHostProtocol;
+    property ModuleName   : string   read FModuleName    write FModuleName;
+    property ServiceName  : string   read FServiceName   write FServiceName;
+    property HostPort     : Cardinal read FHostPort      write FHostPort;
+    property username     : string   read Fusername      write Fusername;
+    property password     : string   read Fpassword      write Fpassword;
+    property Classcode    : string   read FClasscode     write FClasscode;
+    property Balancecode  : string   read FBalancecode   write FBalancecode;
+    property Pccode       : string   read FPccode        write FPccode;
+
+    function ReadCard(var card, name: string; var Money: currency): Integer;
+    procedure Consume(card, flow, dt: string; pay: Cardinal;
+      var balance: Cardinal; var iReturn: Integer);
+  end;
+
+implementation
+
+{ TBSJKReader }
+
+procedure TBSJKReader.ClosePort;
+begin
+
+end;
+
+procedure TBSJKReader.Consume(card, flow, dt: string; pay: Cardinal;
+  var balance: Cardinal; var iReturn: Integer);
+begin
+
+end;
+
+constructor TBSJKReader.Create(AComPort: Word);
+begin
+
+end;
+
+destructor TBSJKReader.Destroy;
+begin
+
+  inherited;
+end;
+
+function TBSJKReader.OpenPort(sIn: WideString): Boolean;
+begin
+
+end;
+
+function TBSJKReader.ReadCard(var card, name: string;
+  var Money: currency): Integer;
+begin
+
+end;
+
+end.

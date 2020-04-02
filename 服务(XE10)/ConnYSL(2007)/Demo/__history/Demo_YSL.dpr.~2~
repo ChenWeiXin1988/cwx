@@ -1,0 +1,15 @@
+program Demo_YSL;
+
+uses
+  Forms,
+  ufrmMain in 'frm\ufrmMain.pas' {frmMain},
+  uYSL_Reader in 'public\uYSL_Reader.pas';
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TfrmMain, frmMain);
+  Application.Run;
+end.

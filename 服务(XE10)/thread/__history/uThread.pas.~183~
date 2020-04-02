@@ -1,0 +1,362 @@
+unit uThread;
+
+interface
+
+uses
+  System.Classes, System.SysUtils, System.DateUtils, Vcl.Forms, idhttp, uObj,
+  uPos_YSL, IdSSLOpenSSL, IdSSLOpenSSLHeaders, superobject;
+
+type
+  //与数据库的连接测试
+  TDatabaseThread= class(TThread)
+  private
+    _Pause: Boolean;      //暂停标记
+    _List: TStringList;
+    _Last: TDateTime;     //上一次执行时间
+    _Meal: TMeals;        //营业时间段
+  protected
+    procedure Execute; override;
+  public
+    function Paused: Boolean;
+    procedure Pause;             //暂停
+    procedure Goon;              //继续
+    constructor Create(_Sub: Boolean= False);
+    destructor Destroy; override;
+  end;
+
+  //http or https 请求测试
+  THttpThread= class(TThread)
+  private
+    _Pause: Boolean;      //暂停标记
+    _Http: TIdHTTP;       //idhttp
+    _IdSSL: TIdSSLIOHandlerSocketOpenSSL;
+    _List: TStringList;   //params
+    _Mode: Integer;       //请求类型 0 list 1 json
+    _Last: TDateTime;     //上一次执行时间
+  protected
+    procedure Execute; override;
+  public
+    function Paused: Boolean;
+    procedure Pause;             //暂停
+    procedure Goon;              //继续
+    constructor Create(_Sub: Boolean= False; _Type: Integer= 0);
+    destructor Destroy; override;
+
+    //检测心跳
+    function SendHeart(var sOut: string): Boolean;
+    //发送请求
+    function Info_POSt(var sOut: string; smethod, content: string): Boolean;
+  end;
+
+  //串口通讯测试
+  TComThread= class(TThread)
+  private
+    _Pause: Boolean;      //暂停标记
+    _Ysl: TYSLPos;        //依时利消费机(测试使用下)
+    _Last: TDateTime;     //上一次执行时间
+  protected
+    procedure Execute; override;
+  public
+    function Paused: Boolean;
+    procedure Pause;             //暂停
+    procedure Goon;              //继续
+    constructor Create(_Sub: Boolean= False);
+    destructor Destroy; override;
+  end;
+
+var
+  iResult: boolean;
+
+implementation
+
+uses uPublic, uVar;
+
+{ TDatabaseThread }
+
+constructor TDatabaseThread.Create(_Sub: Boolean);
+begin
+  _Pause:= _Sub;
+  inherited Create(False);
+  _Last:= Now;
+  _List:= TStringList.Create;
+  _Meal:= TMeals.Create;
+end;
+
+destructor TDatabaseThread.Destroy;
+begin
+  if Assigned(_List) then FreeAndNil(_List);
+  if Assigned(_Meal) then FreeAndNil(_Meal);
+  inherited;
+end;
+
+procedure TDatabaseThread.Execute;
+var
+  sStr: string;
+begin
+  inherited;
+  while (not Terminated) do
+  begin
+    try
+      Application.ProcessMessages;               //防止切换输入法等引起程序假死
+      if _PAUSE then
+      begin
+        Sleep(200);
+        Continue;
+      end;
+      if not Assigned(_Meal) then
+      begin
+        Sleep(200);
+        Continue;
+      end;
+      if SecondsBetween(Now, _Last)< 10 then      //10s执行一次
+      begin
+        Sleep(200);
+        Continue;
+      end;
+      try
+        _Meal.LoadFromDB();
+        sStr:= '[TDatabaseThread] 执行一次 条目数量: ['+ IntToStr(_Meal.Count)+ ']!';
+        Systemlog(sStr);
+        _Last:= Now;
+      except
+        on E: Exception do
+        begin
+          sStr:= '[TDatabaseThread] exception: '+ e.Message;
+          systemLog(sStr);
+          Sleep(30);
+        end;
+      end;
+    finally
+      sleep(60);
+    end;
+  end;
+end;
+
+procedure TDatabaseThread.Goon;
+begin
+  _Pause:= False;
+end;
+
+procedure TDatabaseThread.Pause;
+begin
+  _Pause:= True;
+end;
+
+function TDatabaseThread.Paused: Boolean;
+begin
+  Result:= _Pause;
+end;
+
+{ THttpThread }
+
+constructor THttpThread.Create(_Sub: Boolean; _Type: Integer);
+begin
+  _Pause:= _Sub;
+  _Mode:= _Type;
+  inherited Create(False);
+  _Last:= Now;
+  _List:= TStringList.Create;
+  _Http  := Tidhttp.Create(nil);
+  case _Mode of
+    0: _Http.Request.ContentType    := 'application/x-www-form-urlencoded';
+    1: _Http.Request.ContentType    := 'application/json;charset=UTF-8';
+  end;
+  _Http.HandleRedirects:= True;
+  _Http.Request.UserAgent      := 'Mozilla/4.0 (compatible; Win32; WinHttp.WinHttpRequest.5)';
+  _Http.ReadTimeout            := 5000;
+  _Http.ConnectTimeout := 5000;
+
+  //如果是https请求 额外添加如下步骤
+  if GAppRunClass.RunParam.iHttpType= 1 then
+  begin
+    _IdSSL:= TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+    _IdSSL.SSLOptions.Method:= sslvSSLv23;
+    _IdSSL.SSLOptions.Mode:= sslmClient;
+    _Http.IOHandler:= _IdSSL;
+  end;
+end;
+
+destructor THttpThread.Destroy;
+begin
+  if Assigned(_List) then
+    FreeAndNil(_List);
+  if Assigned(_Http) then
+     FreeAndNil(_Http);
+  inherited;
+end;
+
+procedure THttpThread.Execute;
+var
+  sStr, sOut: string;
+begin
+  inherited;
+  while (not Terminated) do
+  begin
+    try
+      Application.ProcessMessages;               //防止切换输入法等引起程序假死
+      if _PAUSE then
+      begin
+        Sleep(200);
+        Continue;
+      end;
+      if SecondsBetween(Now, _Last)< 5 then      //5s执行一次
+      begin
+        Sleep(200);
+        Continue;
+      end;
+      try
+        if SendHeart(sOut) then
+          Systemlog(sOut);
+        _Last:= Now;
+      except
+        on E: Exception do
+        begin
+          sStr:= '[THttpThread] exception: '+ e.Message;
+          systemLog(sStr);
+          Sleep(30);
+        end;
+      end;
+    finally
+      sleep(60);
+    end;
+  end;
+end;
+
+procedure THttpThread.Goon;
+begin
+  _Pause:= False;
+end;
+
+function THttpThread.Info_POSt(var sOut: string; smethod,
+  content: string): Boolean;
+var
+  sSend, str: string;
+begin
+  Result := False;
+  _List.Clear;
+  str := 'method=' + smethod;
+  _List.Add(UTF8Encode(str));
+  str := 'timestamp=' + FormatDateTime('yyyy-MM-dd HH:mm:ss', Now);
+  _List.Add(UTF8Encode(str));
+  str := 'content=' + content;
+  _List.Add(UTF8Encode(str));
+  try
+    sOut := _http.Post(GAppRunClass.RunParam.sRemoteUrl, _List);
+    sOut := UTF8Decode(sOut);
+    systemLog(' [SendHeart] 返回: '+ sOut);
+    Result := True;
+  except
+    on e: Exception do
+    begin
+      sOut:= e.Message;
+    end;
+  end;
+end;
+
+procedure THttpThread.Pause;
+begin
+  _Pause:= True;
+end;
+
+function THttpThread.Paused: Boolean;
+begin
+  Result:= _Pause;
+end;
+
+function THttpThread.SendHeart(var sOut: string): Boolean;
+var
+  Vjson: ISuperObject;
+begin
+  Result:= False;
+  Vjson := SO();
+  try
+    Vjson.S['poscode'] := '35';
+    if not Info_POSt(sOut, 'cwx.heart', Vjson.AsString) then
+    begin
+
+      Exit;
+    end;
+    Result:= True;
+  finally
+    Vjson := nil;
+  end;
+end;
+
+{ TComThread }
+
+constructor TComThread.Create(_Sub: Boolean);
+begin
+  _Pause:= _Sub;
+  _Last:= Now;
+  inherited Create(False);
+  _Ysl:= TYSLPos.Create(4); //打开COM4 串口其它参数在dll里默认了
+end;
+
+destructor TComThread.Destroy;
+begin
+  if Assigned(_Ysl) then
+    FreeAndNil(_Ysl);
+  inherited;
+end;
+
+procedure TComThread.Execute;
+var
+  sStr: string;
+  sCard, sMoney, sErr: Ansistring;
+  iRet: Integer;
+begin
+  inherited;
+  while (not Terminated) do
+  begin
+    try
+      Application.ProcessMessages;               //防止切换输入法等引起程序假死
+      if _PAUSE then
+      begin
+        Sleep(200);
+        Continue;
+      end;
+      if SecondsBetween(Now, _Last)< 3 then      //3s读卡一次
+      begin
+        Sleep(200);
+        Continue;
+      end;
+      try
+        //发送串口命令
+//        iRet:= _Ysl.ReadCard(sCard, sMoney, sErr);
+        //此处测试下串口能正常打开就可以了  accessport监听下就可以了
+        sStr:= '[TComThread] 执行一次!';
+        Systemlog(sStr);
+        _Last:= Now;
+      except
+        on E: Exception do
+        begin
+          sStr:= '[TComThread] exception: '+ e.Message;
+          systemLog(sStr);
+          Sleep(30);
+        end;
+      end;
+    finally
+      sleep(60);
+    end;
+  end;
+end;
+
+procedure TComThread.Goon;
+begin
+  _Pause:= False;
+end;
+
+procedure TComThread.Pause;
+begin
+  _Pause:= True;
+end;
+
+function TComThread.Paused: Boolean;
+begin
+  Result:= _Pause;
+end;
+
+initialization
+  iResult := IdSSLOpenSSLHeaders.Load();
+
+end.

@@ -1,0 +1,80 @@
+unit uHttpEvent;
+
+interface
+
+uses
+  iocp, iocp.Http, superobject, SysUtils;
+
+type
+  THttpEvent= class
+    //心跳
+    class function _Heart(request: TIocpHttpRequest; response: TIocpHttpResponse): Boolean;
+    //获取服务时间
+    class function _GetServerTime(request: TIocpHttpRequest; response: TIocpHttpResponse): Boolean;
+    //
+    class function _HttpSend(response: TIocpHttpResponse; sSend: string): Boolean;
+  end;
+
+implementation
+
+uses uPublic;
+
+{ THttpEvent }
+
+class function THttpEvent._GetServerTime(request: TIocpHttpRequest;
+  response: TIocpHttpResponse): Boolean;
+var
+  sCode, sMsg, sAppkey, sSend: string;
+  vJs, tJs: ISuperObject;
+begin
+  sCode:= '9001';
+  sMsg:= 'Unknown error';
+  try
+    sAppkey:= GetParam(request, 'appKey');
+    sCode:= '9000';
+    sMsg:= 'Success';
+  finally
+    tJs:= TSuperObject.Create;
+    tJs.S['code']:= sCode;
+    tJs.S['message']:= sMsg;
+    tJs.S['servertime']:= FormatDateTime('YYYY-MM-DD hh:mm:ss', Now);
+    sSend:= tJs.AsString;
+    _HttpSend(response, sSend);
+  end;
+end;
+
+class function THttpEvent._Heart(request: TIocpHttpRequest;
+  response: TIocpHttpResponse): Boolean;
+var
+  sCode, sMsg, sAppkey, sSend: string;
+  vJs, tJs: ISuperObject;
+begin
+  sCode:= '9001';
+  sMsg:= 'Unknown error';
+  systemLog(request.DataString);
+  try
+    sAppkey:= GetParam(request, 'content');
+    sCode:= '9000';
+    sMsg:= 'Success';
+  finally
+    tJs:= TSuperObject.Create;
+    tJs.S['code']:= sCode;
+    tJs.S['message']:= sMsg;
+    tJs.S['servertime']:= FormatDateTime('YYYY-MM-DD hh:mm:ss', Now);
+    sSend:= tJs.AsString;
+    _HttpSend(response, sSend);
+  end;
+end;
+
+class function THttpEvent._HttpSend(response: TIocpHttpResponse;
+  sSend: string): Boolean;
+var
+  O: TIocpHttpWriter;
+begin
+  O:= response.GetOutWriter();
+  O.Charset:= hct_UTF8;
+  O.Write(sSend);
+  O.Flush;
+end;
+
+end.

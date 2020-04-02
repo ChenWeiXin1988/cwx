@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2017-12-18 13:08:39.290.pas,D:\workspace2007\新建文件夹\Unit21.pas=D:\workspace2007\1123\httpClient\Unit1.pas</Transaction>
+    <Transaction>2017-12-18 13:08:39.290.dfm,D:\workspace2007\新建文件夹\Unit21.dfm=D:\workspace2007\1123\httpClient\Unit1.dfm</Transaction>
+    <Transaction>2017-12-18 13:08:57.904.dproj,D:\workspace2007\新建文件夹\Project15.dproj=D:\workspace2007\1123\httpClient\demo1.dproj</Transaction>
+    <Transaction>2017-12-18 14:08:08.027.pas,D:\workspace2007\1123\httpClient\Unit3.pas=D:\workspace2007\1123\httpClient\uVar.pas</Transaction>
+    <Transaction>2017-12-19 10:28:59.978.pas,D:\workspace2007\1123\httpClient\Unit3.pas=D:\workspace2007\1123\httpClient\uFrmDish.pas</Transaction>
+    <Transaction>2017-12-19 10:28:59.978.dfm,D:\workspace2007\1123\httpClient\Unit3.dfm=D:\workspace2007\1123\httpClient\uFrmDish.dfm</Transaction>
+    <Transaction>2020-04-01 15:49:34.273.dproj,D:\Delphi系统服务\HTTP请求中心(2007)\客户端\demo1.dproj=D:\Delphi系统服务\HTTP请求中心(2007)\客户端\ClientDemo.dproj</Transaction>
+    <Transaction>2020-04-01 16:17:11.503.pas,D:\Delphi系统服务\HTTP请求中心(2007)\客户端\uFrmDish.pas=</Transaction>
+    <Transaction>2020-04-01 16:17:11.503.dfm,D:\Delphi系统服务\HTTP请求中心(2007)\客户端\uFrmDish.dfm=</Transaction>
+    <Transaction>2020-04-01 16:17:26.698.pas,D:\Delphi系统服务\HTTP请求中心(2007)\客户端\Unit2.pas=</Transaction>
+    <Transaction>2020-04-01 16:17:26.698.dfm,D:\Delphi系统服务\HTTP请求中心(2007)\客户端\Unit2.dfm=</Transaction>
+    <Transaction>2020-04-01 16:17:29.437.pas,D:\Delphi系统服务\HTTP请求中心(2007)\客户端\Unit4.pas=</Transaction>
+    <Transaction>2020-04-01 16:17:29.437.dfm,D:\Delphi系统服务\HTTP请求中心(2007)\客户端\Unit4.dfm=</Transaction>
+    <Transaction>2020-04-01 16:17:32.947.pas,D:\Delphi系统服务\HTTP请求中心(2007)\客户端\Unit5.pas=</Transaction>
+    <Transaction>2020-04-01 16:17:32.947.dfm,D:\Delphi系统服务\HTTP请求中心(2007)\客户端\Unit5.dfm=</Transaction>
+  </Transactions>
+</BorlandProject>

@@ -1,0 +1,137 @@
+unit uVar;
+
+interface
+  uses SysUtils,IniFiles,Forms,IdHTTP,superobject,CnSHA1,Classes;
+    //运行参数
+ type
+  TRunPara = record
+    url :string;
+  end;
+  TAppRunClass = class
+  private
+   FRunPara : TRunPara;
+//   fidhttp :Tidhttp;
+  published
+   property RunPara : TRunPara read FRunPara write FRunPara ;
+  public
+   GDish :THashedStringList;
+   function ReadPara : Boolean;
+   function WritePara : Boolean;
+   function Info_POSt(var sOut: string; smethod, content: string): Boolean;
+   constructor Create;
+   destructor Destroy; override;
+  end;
+  var
+  GAppRunClass : TAppRunClass;
+  GDishID,GdishName,Gprice :string;
+implementation
+
+{ TAppRunClass }
+
+constructor TAppRunClass.Create;
+begin
+//  fidhttp := Tidhttp.Create(nil);
+//  fidhttp.Request.ContentType := 'application/x-www-form-urlencoded';
+//  fidhttp.ReadTimeout := 5000;
+//  fidhttp.ConnectTimeout := 5000;
+  GDish := THashedStringList.Create;
+end;
+
+destructor TAppRunClass.Destroy;
+begin
+//  FreeAndNil(fidhttp);
+  FreeAndNil(GDish);
+  inherited;
+end;
+
+
+  
+function TAppRunClass.Info_POSt(var sOut: string; smethod, content: string): Boolean;
+var
+  sSend, str: string;
+  lSend: TStringList;
+  fidhttp: Tidhttp;
+begin
+  fidhttp := Tidhttp.Create(nil);
+  try
+    fidhttp.Request.ContentType := 'application/x-www-form-urlencoded';
+    fidhttp.ReadTimeout := 5000;
+    fidhttp.ConnectTimeout := 5000;
+
+    Result := False;
+    lSend := TStringList.Create;
+    try
+      str := 'method=' + smethod;
+      lSend.Add(UTF8Encode(str));
+      str := 'format=' + 'JSON';
+      lSend.Add(UTF8Encode(str));
+      str := 'charset=' + 'utf-8';
+      lSend.Add(UTF8Encode(str));
+      str := 'sign_type=' + 'sha1';
+      lSend.Add(UTF8Encode(str));
+      str := 'timestamp=' + FormatDateTime('yyyy-MM-dd HH:mm:ss', Now);
+      lSend.Add(UTF8Encode(str));
+      str := 'version=' + '1.0';
+      lSend.Add(UTF8Encode(str));
+      str := 'content=' + content;
+      lSend.Add(UTF8Encode(str));
+      try
+        sOut := fidhttp.Post(GAppRunClass.RunPara.url, lSend);
+        sOut := UTF8Decode(sOut);
+        Result := True;
+      except
+        on e: Exception do
+        begin
+          sOut:= e.Message;
+        end;
+      end;
+    finally
+      FreeAndNil(lSend);
+    end;
+  finally
+    FreeAndNil(fidhttp);
+  end;
+end;
+
+function TAppRunClass.ReadPara: Boolean;
+var
+  sFile : string;
+  sIni : TIniFile;
+begin
+  Result := False;
+  sFile :=   ExtractFilePath(Application.ExeName) + 'CLIENT.INI';
+  if FileExists(sFile) then
+  begin
+    sIni := TIniFile.Create(sFile);
+    try
+      FRunPara.url := sIni.ReadString('SYSTEM','url','');
+      Result := True;
+    finally
+      FreeAndNil(sIni);
+    end;
+  end;
+
+end;
+
+
+function TAppRunClass.WritePara: Boolean;
+var
+  sFile : string;
+  sIni : TIniFile;
+begin
+  Result := False;
+  sFile :=   ExtractFilePath(Application.ExeName) + 'CLIENT.INI';
+  if FileExists(sFile) then
+  begin
+    sIni := TIniFile.Create(sFile);
+    try
+      //
+      Result := True;
+    finally
+      FreeAndNil(sIni);
+    end;
+  end;
+
+end;
+
+end.

@@ -1,0 +1,87 @@
+unit uFactory;
+
+interface
+
+uses System.SysUtils, Vcl.Forms;
+
+type
+  TAppFactory = class
+  private
+    //
+  protected
+    function CreateMainForm(var sErr: string) : boolean; virtual;
+  public
+    constructor Create; virtual;
+    destructor Destroy; override;
+    function Factory(var sErr: string) : Boolean; virtual;
+  end;
+
+implementation
+
+uses uVar, uFrmMain, uPublic;
+
+{ TAppFactory }
+
+constructor TAppFactory.Create;
+begin
+  GAppRunClass := TAppRunClass.Create;
+end;
+
+function TAppFactory.CreateMainForm(var sErr: string): boolean;
+begin
+  try
+    Application.CreateForm(TFormMain,FormMain);
+    result := true;
+  except
+    sErr := 'Err:创建主窗体失败';
+  end;
+end;
+
+destructor TAppFactory.Destroy;
+begin
+  try
+    if GAppRunClass <> nil then
+    begin
+      GAppRunClass.DestroyThread;
+      FreeAndNil(GAppRunClass);
+    end;
+  finally
+
+  end;
+  inherited;
+end;
+
+function TAppFactory.Factory(var sErr: string): Boolean;
+begin
+  Result := False;
+  while not Result do
+  begin
+    ProcessMessage;
+    if not GAppRunClass.ReadParam then
+    begin
+      sErr :='系统参数读取错误! 系统无法正常启动!';
+      Sleep(2000);
+      Continue;
+    end;
+    if not GAppRunClass.InitDBConnection then
+    begin
+      sErr :='Database Connect Error!!';
+      Sleep(2000);
+      Continue;
+    end;
+    if not GAppRunClass.InitDBOBJ then
+    begin
+      sErr := '初始化数据库参数时发生异常，系统无法正常启动！';
+      Sleep(2000);
+      Continue;
+    end;
+    if not GAppRunClass.InitThread(False) then
+    begin
+      Sleep(2000);
+      Continue;
+    end;
+    Result := True;
+  end;
+end;
+
+end.

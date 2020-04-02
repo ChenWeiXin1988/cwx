@@ -1,0 +1,10 @@
+unit uPublic;
+
+interface
+
+  //防止切换输入法等引起程序假死     1.3.7.0
+  procedure ProcessMessage;
+
+implementation
+
+end.

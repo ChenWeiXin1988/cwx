@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{1ebe7b3d-596d-4dea-807a-f6db936030b2}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
+    <DCC_DependencyCheckOutputName>..\..\02应用区\XM1711008\ConnYSL.dll</DCC_DependencyCheckOutputName>
+    <MainSource>ConnYSL.dpr</MainSource>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Version>7.0</Version>
+    <DCC_DebugInformation>False</DCC_DebugInformation>
+    <DCC_LocalDebugSymbols>False</DCC_LocalDebugSymbols>
+    <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+    <DCC_Define>RELEASE</DCC_Define>
+    <DCC_ExeOutput>..\..\02应用区\XM1711008</DCC_ExeOutput>
+    <DCC_DcuOutput>..\..\02应用区\XM1711008\Dcu</DCC_DcuOutput>
+    <DCC_ObjOutput>..\..\02应用区\XM1711008\Dcu</DCC_ObjOutput>
+    <DCC_HppOutput>..\..\02应用区\XM1711008\Dcu</DCC_HppOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Version>7.0</Version>
+    <DCC_Define>DEBUG</DCC_Define>
+    <DCC_ExeOutput>..\..\02应用区\XM1711008</DCC_ExeOutput>
+    <DCC_DcuOutput>..\..\02应用区\XM1711008\Dcu</DCC_DcuOutput>
+    <DCC_ObjOutput>..\..\02应用区\XM1711008\Dcu</DCC_ObjOutput>
+    <DCC_HppOutput>..\..\02应用区\XM1711008\Dcu</DCC_HppOutput>
+  </PropertyGroup>
+  <ProjectExtensions>
+    <Borland.Personality>Delphi.Personality</Borland.Personality>
+    <Borland.ProjectType />
+    <BorlandProject>
+<BorlandProject><Delphi.Personality><Parameters><Parameters Name="UseLauncher">False</Parameters><Parameters Name="LoadAllSymbols">True</Parameters><Parameters Name="LoadUnspecifiedSymbols">False</Parameters><Parameters Name="HostApplication">F:\SVN\XM1603008 智慧餐台项目(火锅版与园区版合并版本)\03开发库\02应用区\smarttable\SmartTable.exe</Parameters></Parameters><VersionInfo><VersionInfo Name="IncludeVerInfo">True</VersionInfo><VersionInfo Name="AutoIncBuild">False</VersionInfo><VersionInfo Name="MajorVer">1</VersionInfo><VersionInfo Name="MinorVer">0</VersionInfo><VersionInfo Name="Release">0</VersionInfo><VersionInfo Name="Build">0</VersionInfo><VersionInfo Name="Debug">False</VersionInfo><VersionInfo Name="PreRelease">False</VersionInfo><VersionInfo Name="Special">False</VersionInfo><VersionInfo Name="Private">False</VersionInfo><VersionInfo Name="DLL">False</VersionInfo><VersionInfo Name="Locale">2052</VersionInfo><VersionInfo Name="CodePage">936</VersionInfo></VersionInfo><VersionInfoKeys><VersionInfoKeys Name="CompanyName">一起生活网络有限公司</VersionInfoKeys><VersionInfoKeys Name="FileDescription">智慧餐台对接依时利消费机</VersionInfoKeys><VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys><VersionInfoKeys Name="InternalName">POS机接口</VersionInfoKeys><VersionInfoKeys Name="LegalCopyright"></VersionInfoKeys><VersionInfoKeys Name="LegalTrademarks"></VersionInfoKeys><VersionInfoKeys Name="OriginalFilename"></VersionInfoKeys><VersionInfoKeys Name="ProductName">POS机接口</VersionInfoKeys><VersionInfoKeys Name="ProductVersion">1.0.1.0</VersionInfoKeys><VersionInfoKeys Name="Comments">智慧餐台对接依时利消费机</VersionInfoKeys></VersionInfoKeys><Source><Source Name="MainSource">ConnYSL.dpr</Source></Source></Delphi.Personality></BorlandProject></BorlandProject>
+  </ProjectExtensions>
+  <Import Project="$(MSBuildBinPath)\Borland.Delphi.Targets" />
+  <ItemGroup>
+    <DelphiCompile Include="ConnYSL.dpr">
+      <MainSource>MainSource</MainSource>
+    </DelphiCompile>
+    <DCCReference Include="InterfaceDll.pas" />
+    <DCCReference Include="UBuffer.pas" />
+    <DCCReference Include="uCRC8.pas" />
+    <DCCReference Include="unt_objects.pas" />
+  </ItemGroup>
+</Project>

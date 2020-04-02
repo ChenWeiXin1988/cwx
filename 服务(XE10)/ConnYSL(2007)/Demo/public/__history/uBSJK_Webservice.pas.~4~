@@ -1,0 +1,14 @@
+unit uBSJK_Webservice;
+
+interface
+
+uses
+  Windows, SysUtils, qjson, IniFiles;
+
+const
+  Webservice = 'ConnBSJK.dll';
+  INI_POS_BSJK = 'BSJK.ini';
+
+implementation
+
+end.

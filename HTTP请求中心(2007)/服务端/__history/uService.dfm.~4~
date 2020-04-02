@@ -1,0 +1,9 @@
+object CenterServer1: TCenterServer1
+  OldCreateOrder = False
+  DisplayName = 'CenterServer1'
+  OnExecute = ServiceExecute
+  OnStart = ServiceStart
+  OnStop = ServiceStop
+  Height = 150
+  Width = 215
+end

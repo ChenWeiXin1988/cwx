@@ -1,0 +1,10 @@
+unit uBSJK_Webservice;
+
+interface
+
+uses
+  Windows, SysUtils, qjson, IniFiles;
+
+implementation
+
+end.

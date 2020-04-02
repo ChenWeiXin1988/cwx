@@ -1,0 +1,12 @@
+CREATE TABLE [T_B_MealSet](
+	[fMeal_Id] [varchar](3) NOT NULL,
+	[fMeal_Name] [varchar](20) NOT NULL,
+	[fBegin_Time] [datetime] NOT NULL,
+	[fEnd_Time] [datetime] NOT NULL,
+	[fLimitBc] [money] NULL,
+	[fgz] [money] NULL
+) 
+
+
+
+

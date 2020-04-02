@@ -1,0 +1,50 @@
+unit uConnZHDZ;
+
+interface
+
+const
+  ReadCardDllName = 'ConnMJKJ.dll';
+
+type
+  {扣款返回结构体}
+  TPayRet= packed record
+    RetCode: Word;
+    SerialNo: PChar;
+    Cmoney: Cardinal;
+    Balance: Cardinal;
+  end;
+  PPayRet = ^TPayRet;
+{
+  POS_OpenPort,           //打开端口 串口
+  POS_ClosePort,          //关闭端口 串口
+  POS_InitConnect,        //初始化连接
+  POS_ReadCard,           //读卡  int
+  POS_ReadCard_JSON,      //读卡  json
+  POS_PayRequest,         //扣费  int
+  POS_PayRequest_JSON     //扣费  json
+  POS_PayCancel,          //交易取消
+  POS_PayQuery,           //交易查询
+  POS_PayQuery_JSON,      //交易查询  json
+  POS_PayControl;         //控制命令
+}
+function POS_OpenPort(ComPort:Byte):Boolean;stdcall
+  ; external ReadCardDllName;
+function POS_ClosePort:Boolean;stdcall
+  ; external ReadCardDllName;
+function POS_InitConnect(ATimeOut:word=1000): Word; stdcall
+  ; external ReadCardDllName;
+function POS_ReadCard(var SerialNo:string; var Balance : Cardinal): Word
+  ; stdcall ; external ReadCardDllName;
+function POS_ReadCard_JSON: string; stdcall; external ReadCardDllName;
+function POS_PayRequest(ARet: PPayRet):byte; stdcall
+  ; external ReadCardDllName;
+function POS_PayRequest_JSON(str: string): string; stdcall; external ReadCardDllName;
+function POS_PayQuery(var No: Word; var CardNo: string;
+  var PayMoney, Balance: Cardinal): Word; stdcall; external ReadCardDllName;
+function POS_PayQuery_JSON(No: Word): string; stdcall; external ReadCardDllName;
+function POS_Control(var Cmd: Word): word; stdcall; external ReadCardDllName;
+function POS_PayCancel(var No: word): Word; stdcall; external ReadCardDllName;
+
+implementation
+
+end.

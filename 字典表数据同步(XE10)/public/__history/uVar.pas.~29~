@@ -1,0 +1,242 @@
+unit uVar;
+
+interface
+  uses Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, FireDAC.Stan.ExprFuncs,
+  FireDAC.Phys.SQLiteDef, FireDAC.UI.Intf, FireDAC.VCLUI.Wait,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.Phys.Intf,
+  FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys,
+  FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt,uLogUtils,
+  FireDAC.Phys.MSSQLDef, FireDAC.Phys.ODBCBase, FireDAC.Phys.MSSQL, Data.DB,
+  FireDAC.Comp.DataSet, FireDAC.Comp.Client, FireDAC.Comp.UI,System.IniFiles,
+  FireDAC.Phys.SQLite,uObj;
+const
+  DefDataTable = 'T_B_DefaultWares,T_B_Dish,T_B_DishShow,T_B_POP,T_B_RfidLink,T_B_RfidTag,T_B_RfidTagClass,T_B_RfidTagClassPre,T_B_MealSet';
+  DefLoadTable = 'T_C_TotalRec,T_C_DetailRec';
+
+  sKeyName= 'DataManager';
+
+type
+  //运行参数
+  TSetState = procedure(const bValue:Boolean) of object;
+  TRunPara = record
+    //本地
+    sDriverID   :string;    //数据库类型
+    sDBServer   :string;    //数据库服务器名称
+    sDBLoginName:string;    //数据库登录名
+    sDBLoginPW  :string;    //数据库登录密码
+    sDBDataName :string;    //数据库名
+    //服务器
+    sSDriverID   :string;    //数据库类型
+    sSDBServer   :string;    //数据库服务器名称
+    sSDBLoginName:string;    //数据库登录名
+    sSDBLoginPW  :string;    //数据库登录密码
+    sSDBDataName :string;    //数据库名
+
+    sUpDateListStr :string;  //更新数据表list格式字符串
+    sUpLoadListStr :string;  //更新流水表list格式字符串
+  end;
+
+  TAppRunClass = class
+  private
+    FDManager : TFDManager;      //连接池
+    FRunPara : TRunPara;
+    FLog : TLog;
+    SetState :TSetState;
+
+    GLAitem :TTables;    //本地表
+    GSAitem :TTables;    //服务表
+    iTopNum :Integer;
+    function  GetLConnDefName:string;
+    function  GetSConnDefName:string;
+    function  GetActive :Boolean;
+    procedure SetActive(const Value: Boolean);
+  published
+    property Log : TLog read FLog write FLog;
+  public
+    //数据库类
+    property FDAcitve :Boolean read GetActive write SetActive;
+    property ConnState : TSetState read SetState write SetState;
+    property LConnDefName:string  read GetLConnDefName;
+    property SConnDefName:string  read GetSConnDefName;
+    property RunPara: TRunPara read FRunPara ;
+    function InitDBConnection:Boolean;          //初始化数据库连接
+    function ReadParam : Boolean;    //读取基础参数
+    function UpdateTable(tableName:string):Boolean; //更新表数据
+    constructor Create;
+    destructor Destroy; override;
+  end;
+
+   var
+   GAppRunClass: TAppRunClass;
+
+implementation
+
+{ TAppRunClass }
+
+constructor TAppRunClass.Create;
+begin
+   FDManager := TFDManager.Create(nil);
+   FLog := TLog.Create(ExtractFilePath(Application.ExeName) + 'Log\');
+   GLAitem := TTables.Create;
+   GSAitem := TTables.Create;
+end;
+
+destructor TAppRunClass.Destroy;
+begin
+  FreeAndNil(FDManager);
+  if FLog                 <> nil then FreeAndNil(FLog);
+  inherited;
+end;
+
+function TAppRunClass.GetActive: Boolean;
+begin
+  Result := FDManager.Active;
+end;
+
+function TAppRunClass.GetLConnDefName: string;
+begin
+    Result := 'LDSprogram';
+end;
+
+function TAppRunClass.GetSConnDefName: string;
+begin
+    Result := 'SDSprogram';
+end;
+
+function TAppRunClass.InitDBConnection: Boolean;
+var
+   oParams: TStrings;
+begin
+  oParams := TStringList.Create;
+  try
+    //连接SQL Server
+    oParams.Clear;
+    oParams.Add('Server='+ FRunPara.sSDBServer);
+    oParams.Add('Database=' + FRunPara.sSDBDataName);
+    oParams.Add('CharacterSet=utf8');
+    oParams.Add('User_Name='+FRunPara.sSDBLoginName);
+    oParams.Add('Password='+FRunPara.sSDBLoginPW);
+    oParams.Add('Pooled=True');
+    oParams.Add('POOL_MaximumItems=1');
+    FDManager.AddConnectionDef(SConnDefName, FRunPara.sSDriverID, oParams);
+    //连接SQLite
+    oParams.Clear;
+    oParams.Add('Database=' + FRunPara.sDBDataName);
+    oParams.Add('CharacterSet=utf8');
+    oParams.Add('Pooled=True');
+    oParams.Add('POOL_MaximumItems=1');
+    FDManager.AddConnectionDef(LConnDefName, FRunPara.sDriverID, oParams);
+    result := true;
+  finally
+     FreeAndNil(oParams);
+  end;
+end;
+
+function TAppRunClass.ReadParam: Boolean;
+var
+  sFile : string;
+  sIni : TIniFile;
+begin
+  Result := False;
+  sFile := ExtractFilePath(Application.ExeName) + 'dm.ini';
+  if  FileExists(sFile) then
+  begin
+    sIni := TIniFile.Create(sFile);
+    try
+      //本地数据库参数 SQLite
+      FRunPara.sDriverID := sIni.ReadString('DATABASE','sDriverID','MSSQL');
+      FRunPara.sDBServer := sIni.ReadString('DATABASE','sDBServer','(local)');
+      FRunPara.sDBLoginName := sIni.ReadString('DATABASE','sDBLoginName','sa');
+      FRunPara.sDBLoginPW := sIni.ReadString('DATABASE','sDBLoginPW','123');
+      FRunPara.sDBDataName := sIni.ReadString('DATABASE','sDBDataName','iccmdb_smarttable');
+      //服务器数据库参数 SQL Server
+      FRunPara.sSDriverID := sIni.ReadString('SDATABASE','sSDriverID','MSSQL');
+      FRunPara.sSDBServer := sIni.ReadString('SDATABASE','sSDBServer','(local)');
+      FRunPara.sSDBLoginName := sIni.ReadString('SDATABASE','sSDBLoginName','sa');
+      FRunPara.sSDBLoginPW := sIni.ReadString('SDATABASE','sSDBLoginPW','123');
+      FRunPara.sSDBDataName := sIni.ReadString('SDATABASE','sSDBDataName','iccmdb_smarttable');
+
+      FRunPara.sUpDateListStr := sIni.ReadString('SYSTEM','sUpDateListStr',DefDataTable);
+      FRunPara.sUpLoadListStr := sIni.ReadString('SYSTEM','sUpLoadListStr',DefLoadTable);
+      Result := True;
+    finally
+      FreeAndNil(sIni);
+    end;
+  end;
+end;
+
+procedure TAppRunClass.SetActive(const Value: Boolean);
+begin
+  if FDManager.Active = Value then Exit;
+  if Value then
+  begin
+    if FDManager = nil then
+      FDManager := TFDManager.Create(nil);
+    InitDBConnection;
+    FDManager.Open;
+  end
+  else
+  begin
+    FDManager.close;
+    if FDManager <> nil then
+      FreeAndNil(FDManager);
+  end;
+
+end;
+
+function TAppRunClass.UpdateTable(tableName: string): Boolean;
+var
+  LAitem :TTables;    //本地表
+  SAitem :TTables;    //服务表
+  i:Integer;
+begin
+  result := false;
+  LAitem := TTables.Create;
+  SAitem := TTables.Create;
+  try
+    LAItem.SetConnDefName(GetLConnDefName);
+    SAitem.SetConnDefName(GetSConnDefName);
+    LAitem.SetTableName(tableName);
+    SAitem.SetTableName(tableName);
+
+    if not LAitem.LoadFromDB then Exit;
+    if not SAitem.LoadFromDB then Exit;
+
+    GAppRunClass.ConnState(True);
+    for I := 0 to SAitem.VList.count -1 do   //增加。更新本地数据
+    begin
+      if LAitem.VList.IndexOfName(SAitem.VList.Names[i]) = -1 then //本地插入新记录
+      begin
+        //没有这条数据，insert
+        if not LAitem.InsertToDB(SAitem.VList.ValueFromIndex[i]) then
+        FLog.AddLog(Format('%s,插入数据：%s失败',[tablename,SAitem.VList.ValueFromIndex[i]]),ltSys);
+      end
+      else                                                         //本地更新记录
+      begin
+        // 若有查看数据是否一致
+        if LAitem.VList.Values[SAitem.VList.Names[i]] <> SAitem.VList.ValueFromIndex[i] then
+        begin
+          //更新
+          if not LAitem.UpdateToDB(SAitem.VList.ValueFromIndex[i]) then
+          FLog.AddLog(Format('%s,更新数据：%s失败',[tablename,SAitem.VList.ValueFromIndex[i]]),ltSys);
+        end;
+      end;
+    end;
+
+    for I := 0 to LAitem.VList.count -1 do   //删除多余本地数据
+    begin
+      if SAitem.VList.IndexOfName(LAitem.VList.Names[i]) = -1 then
+      begin
+        if not LAitem.DeleteToDB(LAitem.VList.ValueFromIndex[i]) then
+          FLog.AddLog(Format('%s,删除数据：%s失败',[tablename,LAitem.VList.ValueFromIndex[i]]),1);
+      end;
+    end;
+    result := true;
+  finally
+    FreeAndNil(LAitem);
+    FreeAndNil(SAitem);
+  end;
+end;
+
+end.

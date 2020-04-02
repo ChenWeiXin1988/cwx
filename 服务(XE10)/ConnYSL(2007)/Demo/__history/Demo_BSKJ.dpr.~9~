@@ -1,0 +1,16 @@
+program Demo_BSKJ;
+
+uses
+  Forms,
+  ufrmMain in 'frm\ufrmMain.pas' {frmMain},
+  uBSJK_Reader in 'public\uBSJK_Reader.pas',
+  uBSJK_Webservice in 'public\uBSJK_Webservice.pas';
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TfrmMain, frmMain);
+  Application.Run;
+end.

@@ -1,0 +1,347 @@
+﻿unit uBSJK_Reader;
+
+interface
+
+uses
+  Windows, SysUtils, qjson, IniFiles, Classes;
+
+const
+  External_BSKJ_Webservice_DLL = 'WebService.dll';
+  External_YQSH_COM_DLL = 'PReadcardDll.dll';
+  INI_POS_BSJK = 'BSJK.ini';
+    
+  {-------------------------------------------------------------------------------
+    过程名:    init         webservice初始化
+    返回值:    Integer  	0- 成功，1- 失败
+  -------------------------------------------------------------------------------}
+  function init(HostAddress: string;      //服务器IP地址字符串
+      HALength: Cardinal;                 //服务器IP地址字符串长度
+      HostProtocol: string;               //协议名称
+      HPLength: Cardinal;                 //协议名称字符串长度
+      ModuleName: string;                 //服务器模块名称
+      MNLength: Cardinal;                 //服务器模块名称字符串长度
+      ServiceName: string;                //服务名称
+      SNLength: Cardinal;                 //服务名称字符串长度
+      HostPort: Cardinal;                 //端口号
+      Switch: Cardinal                    //默认1
+    ): Integer; stdcall; external External_BSKJ_Webservice_DLL;
+
+  {-------------------------------------------------------------------------------
+    过程名:    UserLogin    webservice登录一卡通
+    返回值:    Integer  	0- 成功，1- 失败
+  -------------------------------------------------------------------------------}
+  function UserLogin(userName: string;    //用户名
+      UNLength: Cardinal;                 //用户名字符串长度
+      password: string;                   //密码
+      HSLength: Cardinal                  //密码字符串长度
+    ): Integer; stdcall; external External_BSKJ_Webservice_DLL;
+
+  {-------------------------------------------------------------------------------
+    过程名:    upFlowingByString    单条流水上传，带流水号，不带密码
+    返回值:    Integer  	0- 成功，1- 失败
+  -------------------------------------------------------------------------------}
+  function upFlowingByString(PFlowing: PChar;  //流水字符串
+      PFlowingLen: PCardinal                     //流水字符串长度
+    ): Integer; stdcall; external External_BSKJ_Webservice_DLL;
+
+  {-------------------------------------------------------------------------------
+    过程名:    queryinfoByStudentCard    通过卡号查询账户信息
+    返回值:    char *  	账户ID #9编号#910位物理卡号#9账户姓名#9性别#9班级或部门名称#9账户状态#9余额
+  -------------------------------------------------------------------------------}
+  function queryinfoByStudentCard(card: PChar; StrLength: PCardinal)
+    : PChar; stdcall; external External_BSKJ_Webservice_DLL;
+
+  {-------------------------------------------------------------------------------
+    过程名:    GetReadCardPort
+    作者:      zj
+    日期:      2007.06.26
+    用途:	     打开aCom端口，连接读卡器。可打开多个串口进行数据接收
+    参数:      var ErrCode:integer;
+                  返回值: 1 - ic读卡器连接成功
+                          0 - id读卡器连接成功
+                          22 - 已经连接成功
+                          其他 - 读卡器连接失败
+               aCom : integer 端口号
+    返回值:    True：函数调用成功  False：函数调用失败;
+  -------------------------------------------------------------------------------}
+  function GetReadCardPort(var ErrCode:integer; aCom : integer): boolean
+    ; stdcall; external External_YQSH_COM_DLL;
+
+  {-------------------------------------------------------------------------------
+    过程名:    CloseReadCardPort
+    作者:      zj
+    日期:      2007.06.26
+    用途:	     关闭打开串口。
+    参数:      aCom : integer 端口号
+    返回值:    True：函数调用成功  False：函数调用失败;
+  -------------------------------------------------------------------------------}
+  function CloseReadCardPort(aCom : integer): boolean
+    ; stdcall; external External_YQSH_COM_DLL;
+
+  {-------------------------------------------------------------------------------
+    过程名:    ReadIdCard
+    作者:      zj
+    日期:      2007.06.26
+    用途:	     读id卡号。
+    参数:      Card 返回的id卡号
+               ErrCode: 3 - 返回的是正常卡号;
+               aCom : integer 端口号
+    返回值:    True：函数调用成功  False：函数调用失败;
+  -------------------------------------------------------------------------------}
+  function ReadIdCard(var Card: Cardinal; var ErrCode: integer; aCom: integer): boolean
+    ; stdcall; stdcall; external External_YQSH_COM_DLL;
+
+type
+  TFourLong = packed record
+  case integer of
+    0 : (iCardinal : Cardinal);
+    1 : (i4 : byte;
+         i3 : byte;
+         i2 : byte;
+         i1 : byte);
+  end;
+
+  TBSJKReader = class(TObject)
+  private
+    FCom         : Word;         //串口
+    FBaudRate    : Cardinal;     //波特率
+    FHostAddress : string;       //主机地址
+    FHostProtocol: string;       //协议
+    FModuleName  : string;       //模块
+    FServiceName : string;       //服务
+    FHostPort    : Cardinal;     //端口
+    Fusername    : string;       //用户名
+    Fpassword    : string;       //密码
+    FClasscode   : string;       //营业部门
+    FBalancecode : string;       //余额类型代码
+    FPccode      : string;       //终端号
+  protected
+    function OpenServer: Boolean;
+    function OpenPort:Boolean;
+    procedure ClosePort;
+  public
+    constructor Create(AComPort: Word);
+    destructor Destroy; override;
+
+    property Com          : Word     read FCom           write FCom;
+    property BaudRate     : Cardinal read FBaudRate      write FBaudRate;
+    property HostAddress  : string   read FHostAddress   write FHostAddress;
+    property HostProtocol : string   read FHostProtocol  write FHostProtocol;
+    property ModuleName   : string   read FModuleName    write FModuleName;
+    property ServiceName  : string   read FServiceName   write FServiceName;
+    property HostPort     : Cardinal read FHostPort      write FHostPort;
+    property username     : string   read Fusername      write Fusername;
+    property password     : string   read Fpassword      write Fpassword;
+    property Classcode    : string   read FClasscode     write FClasscode;
+    property Balancecode  : string   read FBalancecode   write FBalancecode;
+    property Pccode       : string   read FPccode        write FPccode;
+
+    function ReadCard(var card: Cardinal;var  name: string;
+      var Money: currency): Integer;
+    function Consume(card, flow, dt: string; pay: Cardinal;
+      var balance: Currency): Integer;
+
+    //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  
+    function SplitString(Source:string; Deli: string;
+      var List: TStringList):Boolean ;stdcall;
+    //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  end;
+
+implementation
+
+{ TBSJKReader }
+
+procedure TBSJKReader.ClosePort;
+begin
+  //
+end;
+
+function TBSJKReader.Consume(card, flow, dt: string; pay: Cardinal;
+  var balance: Currency): Integer;
+var
+  sStr, Return: string;
+  PStr, PReturn: PChar;
+  iLen, iLen1: Integer;
+  PLen, PLen1: PCardinal;
+  sList: TStringList;
+begin
+  Result:= -201;
+  iLen1:= 200;
+  if (flow= '') or (card= '') or (Balancecode= '')
+    or (classCode= '') or (dt= '') or (pcCode= '') then Exit;
+  sList:= TStringList.Create;
+  try
+    PLen1:= @iLen1;
+    //单条流水上传 带流水号 不带密码
+    sStr:= flow+ ','+ ''+ ',' + card+ ','+ Balancecode+ ','
+      + IntToStr(pay)+ ','+ classCode+ ','+ dt+ ','+ pcCode;
+    PLen:= @iLen;
+    Result:= upFlowingByString(PChar(sStr), PLen);
+    PReturn:= queryinfoByStudentCard(PChar(card), PLen1);
+    if Trim(StrPas(PReturn))<> '' then Return:= StrPas(PReturn)
+    else Exit;
+    if Trim(Return)= '' then Exit;
+    SplitString(Return, #9, sList);
+    balance:= StrToFloat(sList.Strings[7]);
+  finally
+    FreeAndNil(sList);
+  end;
+end;
+
+constructor TBSJKReader.Create(AComPort: Word);
+var
+  sPath: string;
+  aIni: TIniFile;
+  err: Integer;
+begin
+  sPath:= ExtractFilePath(ParamStr(0))+ INI_POS_BSJK;
+  if FileExists(sPath) then
+  begin
+    aIni:= TIniFile.Create(sPath);;
+    try
+      Com:= AComPort;
+      //读取INI
+      BaudRate:= aIni.ReadInteger('BSJK', 'BaudRate', 9600);
+      HostAddress:= aIni.ReadString('BSJK', 'HostAddress', '');
+      HostProtocol:= aIni.ReadString('BSJK', 'HostProtocol', '');
+      ModuleName:= aIni.ReadString('BSJK', 'ModuleName', '');
+      ServiceName:= aIni.ReadString('BSJK', 'ServiceName', '');
+      HostPort:= aIni.ReadInteger('BSJK', 'HostPort', 8080);
+      username:= aIni.ReadString('BSJK', 'username', '');
+      password:= aIni.ReadString('BSJK', 'password', '');
+      Classcode:= aIni.ReadString('BSJK', 'Classcode', '');
+      Balancecode:= aIni.ReadString('BSJK', 'Balancecode', '');
+      Pccode:= aIni.ReadString('BSJK', 'Pccode', '');
+      //OpenPort;
+      GetReadCardPort(err, Com);
+      OpenServer;
+    finally
+      FreeAndNil(aIni);
+    end;
+  end;
+end;
+
+destructor TBSJKReader.Destroy;
+begin
+  CloseReadCardPort(Com);
+  inherited;
+end;
+
+function TBSJKReader.OpenPort: Boolean;
+var
+  json: TQJson;
+  sIn: WideString;
+begin
+  Result:= False;
+  json:= TQJson.Create;
+  try
+    json.AddVariant('Com', Com);
+    json.AddVariant('BaudRate', BaudRate);
+    json.AddVariant('HostAddress', HostAddress);
+    json.AddVariant('HostProtocol', HostProtocol);
+    json.AddVariant('ModuleName', ModuleName);
+    json.AddVariant('ServiceName', ServiceName);
+    json.AddVariant('HostPort', HostPort);
+    json.AddVariant('username', username);
+    json.AddVariant('password', password);
+    json.AddVariant('Classcode', Classcode);
+    json.AddVariant('Balancecode', Balancecode);
+    json.AddVariant('Pccode', Pccode);
+    sIn:= json.AsString;
+    Result:= BSJK_OpenPort(sIn);
+  finally
+    FreeAndNil(json);
+  end;
+end;
+
+function TBSJKReader.OpenServer: Boolean;
+begin
+  Result:= False;
+  if init(HostAddress, Length(HostAddress),
+    HostProtocol, Length(HostProtocol),
+    ModuleName, Length(ModuleName),
+    ServiceName, Length(ServiceName),
+    HostPort, 1)= 0 then
+  begin
+    if UserLogin(username, Length(username),
+      password, Length(password))= 0 then
+      Result:= True;
+  end;
+end;
+
+function TBSJKReader.ReadCard(var card: Cardinal; var  name: string;
+  var Money: currency): Integer;
+var
+  sCard: string;
+  sOut: WideString;
+  json: TQJson;
+  err: Integer;
+  AFour, AFourTmp: TFourLong;
+  Return: WideString;
+  PReturn: PChar;
+  sList: TStringList;
+  PLen: PCardinal;
+  Len: Cardinal;
+  function AddChar(source: string; c: Char; iLen: Word): string;
+  begin
+    Result:= source;
+    while Length(source)< iLen do
+    begin
+      source:= c+ source;
+    end;
+    Result:= source;
+  end;
+begin
+  Result:= 1;
+  Len:= 200;
+  sList:= TStringList.Create;
+  try
+    if not ReadIdCard(card, err, Com) then Exit;
+    if card= 0 then Exit;
+    AFour.iCardinal := card;
+    AFourTmp.i1 := AFour.i4;
+    AFourTmp.i2 := AFour.i3;
+    AFourTmp.i3 := AFour.i2;
+    AFourTmp.i4 := AFour.i1;
+    card:= AFourTmp.iCardinal;
+    if card=0 then Exit;
+    sCard := AddChar(IntToStr(Card), '0', 10);;
+    if sCard= '0' then Exit;
+    //根据卡号查询帐户信息
+    //账户ID#9编号#910位物理卡号#9账户姓名#9性别#9班级或部门名称#9账户状态#9余额
+    PLen:= @Len;
+    PReturn:= queryinfoByStudentCard(PChar(sCard), PLen);
+    if Trim(StrPas(PReturn))<> '' then Return:= StrPas(PReturn)
+    else Exit;
+    if Trim(Return)= '' then Exit;
+    SplitString(Return, #9, sList);
+    name:= sList.Strings[3];
+    Money:= StrToFloat(sList.Strings[7]);
+    Result:= 0;
+  finally
+    FreeAndNil(sList);
+  end;
+end;
+
+function TBSJKReader.SplitString(Source, Deli: string;
+  var List: TStringList): Boolean;
+var
+  EndOfCurrentString: byte;
+begin
+  Result := False;
+  try
+    if List = nil then Exit;
+    List.Clear;
+    while Pos(Deli, Source)>0 do
+    begin
+      EndOfCurrentString := Pos(Deli, Source);
+      List.add(Copy(Source, 1, EndOfCurrentString - 1));
+      Source := Copy(Source, EndOfCurrentString + length(Deli), length(Source) - EndOfCurrentString);
+    end;
+    List.Add(source);
+    Result := True;
+  finally
+  end;
+end;
+
+end.

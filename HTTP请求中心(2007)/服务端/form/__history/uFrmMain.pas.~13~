@@ -1,0 +1,43 @@
+unit uFrmMain;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, uServer;
+
+type
+  TfrmMain = class(TForm)
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+  private
+    { Private declarations }
+    FServer: TCenterServer;
+  public
+    { Public declarations }
+  end;
+
+var
+  frmMain: TfrmMain;
+
+implementation
+
+uses uHttpEvent;
+
+{$R *.dfm}
+
+procedure TfrmMain.FormCreate(Sender: TObject);
+begin
+  FServer:= TCenterServer.Create(8085);
+  FServer.RegHttpProc('cwx.heart', THttpEvent._Heart);
+  FServer.RegHttpProc('cwx.servertime', THttpEvent._GetServerTime);
+  GURL:= '/gateway.do';
+  FServer.Start;
+end;
+
+procedure TfrmMain.FormDestroy(Sender: TObject);
+begin
+  FServer.Stop;
+end;
+
+end.

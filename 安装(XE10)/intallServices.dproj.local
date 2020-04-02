@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899-12-30 00:00:00.000.520,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.084,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.882,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.982,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.217,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.888,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.105,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.895,C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas=C:\Users\jingchao\Desktop\Delphi系统服务\安装(XE10)\frmMain.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.301,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.562,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.280,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.523,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.281,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.040,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\ServerContainerUnit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.991,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\ServerMethodsUnit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.671,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Project1_TLB.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.022,C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Project1.dproj=C:\Users\jingchao\Desktop\Delphi系统服务\安装(XE10)\intallServices.dproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.816,C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Project1.dproj=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.659,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Project1.ridl</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.895,C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.dfm=C:\Users\jingchao\Desktop\Delphi系统服务\安装(XE10)\frmMain.dfm</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.894,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.729,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.240,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.107,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.208,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.171,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.503,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.964,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.244,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.117,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.813,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.531,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.184,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.204,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.592,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.843,=C:\Users\jingchao\Desktop\Delphi系统服务\安装(XE10)\uServicescontrol.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.760,C:\Users\jingchao\Desktop\Delphi系统服务\安装(XE10)\uServicescontrol.pas=</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.856,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.754,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.858,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.406,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.578,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.392,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.569,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.200,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.329,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.156,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.489,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.730,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.990,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.509,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.917,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.060,=C:\Users\jingchao\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+  </Transactions>
+	<ActiveMobileDevice>
+		<NoProfile iOSSimulator="iPhone5" Android="NF55RWOVAAWWS8CM"/>
+	</ActiveMobileDevice>
+</BorlandProject>

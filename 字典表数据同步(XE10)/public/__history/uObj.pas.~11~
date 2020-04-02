@@ -1,0 +1,372 @@
+unit uObj;
+
+interface
+ uses Classes,SyncObjs,System.SysUtils, System.Variants, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, FireDAC.Stan.ExprFuncs,
+  FireDAC.Phys.SQLiteDef, FireDAC.UI.Intf, FireDAC.VCLUI.Wait,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.Phys.Intf,
+  FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys,
+  FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt,
+  FireDAC.Phys.MSSQLDef, FireDAC.Phys.ODBCBase, FireDAC.Phys.MSSQL, Data.DB,
+  FireDAC.Comp.DataSet, FireDAC.Comp.Client, FireDAC.Comp.UI,System.IniFiles,
+  FireDAC.Phys.SQLite;
+ type
+  TObjBase = class(TPersistent)
+  private
+    FCS: TCriticalSection;
+    FDConn:  TFDConnection;
+    FDQuery: TFDQuery;
+    procedure Lock;
+    procedure Unlock;
+  public
+    procedure Clear; virtual; abstract;
+    constructor Create; virtual;
+    destructor Destroy; override;
+  end;
+
+  TTables = class(TObjBase)
+  private
+    sTableName :string;
+    NameList:THashedStringList;
+    ValueList:THashedStringList;
+    iTopNum :Integer;
+  public
+    property VList: THashedStringList read ValueList;
+    function SetConnDefName(sName:string):Boolean;
+    function SetTableName(sName:string):Boolean;
+    function LoadFromDB(itop:Integer = -1;sWhere:string = ''):Boolean;
+    function LoadFromDBEX:Boolean;
+    function UpdateToDB(sValue :string):Boolean;
+    function InsertToDB(sValue:string):Boolean;
+    function DeleteToDB(sValue :string):Boolean;
+//    function GetList(Aitem:TstringList;sValue:string);
+    constructor Create; override;               //对象创建
+    destructor Destroy; override;               //对象释放
+    procedure Clear; override;
+  end;
+
+implementation
+
+uses uVar, uPublic;
+
+{ TObjBase }
+
+constructor TObjBase.Create;
+begin
+   FDQuery := TFDQuery.Create(nil);
+   FDConn  := TFDConnection.Create(nil);
+   FCS := TCriticalSection.Create;
+   FDQuery.Connection := FDConn;
+end;
+
+destructor TObjBase.Destroy;
+begin
+  FreeAndNil(FDQuery);
+  FreeAndNil(FDConn);
+  FreeAndNil(FCS);
+  inherited;
+end;
+
+procedure TObjBase.Lock;
+begin
+  FCS.Enter;
+end;
+
+procedure TObjBase.Unlock;
+begin
+  FCS.Leave;
+end;
+
+
+{ TTables }
+
+procedure TTables.Clear;
+begin
+  NameList.Clear;
+  ValueList.Clear;
+end;
+
+constructor TTables.Create;
+begin
+  inherited;
+    NameList:=THashedStringList.Create;
+    ValueList:= THashedStringList.Create;
+    iTopNum := 0;
+end;
+
+function TTables.DeleteToDB(sValue: string): Boolean;
+ function GetDelText(sValue:string):string;
+ var
+  Alist :TStringList;
+ begin
+   Alist := TStringList.Create;
+   Alist.StrictDelimiter := true; //空格不切割
+   Alist.CommaText := sValue;
+   Result := 'Delete from '+ sTableName +' where ' + NameList[0] + ' = "' +Alist[0]+'"';
+   freeandnil(Alist);
+ end;
+begin
+  Result := False;
+  if sTableName = '' then Exit;
+  if not GAppRunClass.FDAcitve then exit;
+  lock;
+  try
+    try
+      FDConn.Connected := True;
+      if sValue = '' then Exit;
+      FDQuery.SQL.Text := GetDelText(sValue);
+      SystemLog(Format('%s-Delete：[%s]', [sTableName,FDQuery.SQL.Text]));
+      FDQuery.ExecSQL;
+    except
+      on E: Exception do
+      begin
+        SystemLog(Format('数据%s删除失败 - [Failure:%s]', [sTableName,E.Message]));
+      end;
+    end;
+   Result := True;
+  finally
+    FDConn.Connected := false;
+    Unlock;
+  end;
+end;
+
+destructor TTables.Destroy;
+begin
+  FreeAndNil(NameList);
+  FreeAndNil(ValueList);
+  inherited;
+end;
+
+function TTables.InsertToDB(sValue: string): Boolean;
+ function GetSqlText(svalue:string):string;
+ var
+  i:integer;
+  names:string;
+  sSql :string;
+ begin
+    names := '';
+    for I := 0 to NameList.count -1 do
+    begin
+      names := names + NameList[i];
+       if i <> NameList.Count -1  then
+       names := names + ',';
+    end;
+    sSql := Format(' insert into %s (%s) VALUES(%s)',[sTableName,names,svalue]);
+
+//    result := Format('if OBJECTPROPERTY(OBJECT_ID(''%s''),''TableHasIdentity'') = 1 '+
+//                    'begin set identity_insert %s On %s set identity_insert %s Off end '+
+//                    'else begin %s end',[sTableName,sTableName,sSql,sTableName,sSql]
+//                    );
+     Result := sSql;
+ end;
+begin
+  Result := False;
+  if sTableName = '' then Exit;
+  if not GAppRunClass.FDAcitve then exit;
+  lock;
+  try
+    try
+      FDConn.Connected := True;
+      if sValue = '' then Exit;
+      FDQuery.SQL.Text := GetSqlText(sValue);
+//     GAppRunClass.Log.AddLog(Format('%s-Insert：[%s]', [sTableName,FDQuery.SQL.Text]),1);
+      FDQuery.ExecSQL;
+    except
+      on E: Exception do
+      begin
+        SystemLog(Format('数据%s插入失败 - [Failure:%s]', [sTableName,E.Message]));
+      end;
+    end;
+    Result := True;
+  finally
+    FDConn.Connected := false;
+    Unlock;
+  end;
+end;
+
+function TTables.LoadFromDB(itop:Integer = -1;sWhere:string = ''): Boolean;
+var
+ i:Integer;
+ sValue:string;
+ sKey :string;
+begin
+  Result := False;
+  if sTableName = '' then Exit;
+  if not GAppRunClass.FDAcitve then exit;
+  lock;
+  try
+    try
+      FDConn.Connected := True;
+      if itop = -1 then
+        FDQuery.Open('select * from '+ sTableName + ' ' + sWhere)
+      else
+        FDQuery.Open('select TOP ' + IntToStr(itop) +' * from '+ sTableName+ ' ' + sWhere +'order by  fcode  desc');
+      Clear;
+      FDQuery.GetFieldNames(NameList);
+      FDQuery.First;
+      while not FDQuery.Eof do
+      begin
+        sValue := '';
+        for I := 0 to NameList.Count -1 do
+        begin
+          if i = 0 then
+          begin
+            sKey := FDQuery.Fields[i].AsString;
+          end;
+          sValue := sValue+ '"'+ FDQuery.Fields[i].AsString+'"';
+          if i <> NameList.Count -1 then
+          sValue := sValue + ',';
+        end;
+        ValueList.Add(sKey+ '=' + sValue);
+        FDQuery.Next;
+      end;
+      Result := True;
+    except
+      on E: Exception do
+      begin
+        GAppRunClass.FDAcitve := false;   //连接断开，重置连接池
+        GAppRunClass.ConnState(False);
+        SystemLog(Format('查询表 %s 失败 - [Failure:%s]', [sTableName,E.Message]));
+      end;
+    end;
+  finally
+    FDConn.Connected := false;
+    Unlock;
+  end;
+end;
+
+function TTables.LoadFromDBEX: Boolean;
+var
+ i,k:Integer;
+ sValue:string;
+ sKey :string;
+ time : TDateTime;
+begin
+  Result := False;
+  k:=0;
+  if sTableName = '' then Exit;
+  if not GAppRunClass.FDAcitve then exit;
+  lock;
+  try
+    try
+       FDConn.Connected := True;
+       FDQuery.Open('select  [Emp_ID],[Emp_IC] ,[fCardMoney] ,[fCardMoneyLocal] ,[fCardLastPayTime] ,[fCardType] ,[fGzMoney] ,[bCan] from '+ sTableName);
+       Clear;
+       FDQuery.GetFieldNames(NameList);
+       FDQuery.First;
+       while not FDQuery.Eof do
+       begin
+        sValue := '';
+        for I := 0 to NameList.Count -1 do
+        begin
+        if i = 0 then
+        begin
+         sKey := FDQuery.Fields[i].AsString;
+        end;
+          if i = 4 then //sqlite时间有点问题
+          begin
+            time := FDQuery.Fields[i].AsDateTime;
+            if time < 0 then   
+            sValue := sValue+ '"'+''+'"'
+            else
+            sValue := sValue+ '"'+ FDQuery.Fields[i].AsString+'"';
+          end
+          else
+            sValue := sValue+ '"'+ FDQuery.Fields[i].AsString+'"';
+
+          if i <> NameList.Count -1 then
+           sValue := sValue + ',';
+        end;
+          ValueList.Add(sKey+ '=' + sValue);
+        FDQuery.Next;
+        Inc(k);
+       end;
+       Result := True;
+    except
+      on E: Exception do
+      begin
+         GAppRunClass.FDAcitve := false;   //连接断开，重置连接池
+         GAppRunClass.ConnState(False);
+         SystemLog(Format('查询表 %s 失败 - [Failure:%s%D]', [sTableName,E.Message,K]));
+      end;
+    end;
+  finally
+    FDConn.Connected := false;
+    Unlock;
+  end;
+end;
+
+
+function TTables.SetConnDefName(sName: string): Boolean;
+begin
+  Result := False;
+  try
+    FDConn.ConnectionDefName := sName;
+  except
+    on E: Exception do
+    begin
+      GAppRunClass.Log.AddLog(Format('数据连接失败 - [Failure:%s]', [E.Message]),1);
+    end;
+  end;
+end;
+
+function TTables.SetTableName(sName: string): Boolean;
+begin
+ sTableName := sName;
+end;
+
+function TTables.UpdateToDB(sValue: string): Boolean;
+  function GetSqlUpText(sValue:string):string;
+  var
+    Alist:TStringList;
+    i:Integer;
+  begin
+    try
+      Alist := TStringList.Create;
+      Alist.StrictDelimiter := true; //空格不切割
+      Alist.CommaText := sValue;
+
+      if Alist.count <> NameList.Count  then
+      begin
+        GAppRunClass.Log.AddLog('插入字段与值长度不一致',1);
+        exit;
+      end;
+
+      Result := 'Update '+sTableName + ' Set ';
+      for I := 1 to NameList.Count -1 do
+      begin
+        Result := Result + NameList[i] + ' = ''' + Alist[i] + ''' ';
+        if i <> NameList.Count -1  then
+          Result := Result + ',';
+      end;
+      Result := Result + ' where ' + NameList[0] + '=''' + Alist[0]+'''';
+    finally
+      FreeAndNil(Alist);
+    end;
+  end;
+begin
+  Result := False;
+  if sTableName = '' then Exit;
+  if not GAppRunClass.FDAcitve then exit;
+  lock;
+  try
+    try
+      FDConn.Connected := True;
+      FDQuery.SQL.Text := GetSqlUpText(sValue);
+      if FDQuery.SQL.Text ='' then Exit;
+      GAppRunClass.Log.AddLog(Format('%s-Update：[%s]', [sTableName,FDQuery.SQL.Text]),1);
+      FDQuery.ExecSQL;
+    except
+      on E: Exception do
+      begin
+        GAppRunClass.Log.AddLog(Format('数据%s更新失败 - [Failure:%s]', [sTableName,E.Message]),1);
+      end;
+    end;
+    Result := True;
+  finally
+    FDConn.Connected := false;
+    Unlock;
+  end;
+end;
+
+end.

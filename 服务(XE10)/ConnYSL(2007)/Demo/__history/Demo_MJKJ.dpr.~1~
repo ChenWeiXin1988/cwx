@@ -1,0 +1,20 @@
+program Demo_MJKJ;
+
+uses
+  Forms,
+  ufrmMain in 'frm\ufrmMain.pas' {frmMain},
+  UConsInface in 'public\UConsInface.pas',
+  IFaceStruc in 'public\IFaceStruc.pas',
+  uDefine in 'public\uDefine.pas',
+  uConnZHDZ in 'public\uConnZHDZ.pas',
+  uStructure in 'public\uStructure.pas',
+  uLogUtils in 'public\uLogUtils.pas';
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TfrmMain, frmMain);
+  Application.Run;
+end.
